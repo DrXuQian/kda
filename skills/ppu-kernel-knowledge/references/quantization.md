@@ -12,12 +12,14 @@ Keep artifact axes (physical bytes/folds) distinct from tactic axes (the
 kernel's tile, warps, stages and split). A new reader must consume the declared
 artifact, not silently reinterpret it using its own tile constants.
 
-The TileK memory contains several corrections. Early universal-sharing claims
-and later universal folded-layout prohibitions were both superseded. Later
-host code-slot witnesses support specific cross-T readers with artifact-carried
-folds. Apply the current complete producer-to-consumer witness, including high
-planes and coverage, rather than turn any old table into a permanent guard.
-Host mapping evidence alone does not admit a new device specialization.
+TileK alone does not determine artifact compatibility. Compute the stored
+code-slot map from the artifact's tile and folds, then the consumer map from
+the proposed tactic. Compare the logical N/K coordinates at every slot,
+including high planes, scales, tails and coverage. Preserve artifact-carried
+folds rather than recompute them from the reader's TileK. A different TileK
+can work when those maps agree; folding alone neither permits nor forbids it.
+Historical cross-T witnesses established specific host mappings. A new reader
+still needs its own complete mapping check and device validation.
 
 Provide independent full-weight and scale/min recovery for an added format.
 An end-to-end GEMM-only test cannot distinguish a packing error from a reader

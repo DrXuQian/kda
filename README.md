@@ -43,7 +43,11 @@ Have a kernel that needs optimization? [Submit a request](https://github.com/NVl
 ## Getting Started
 Use this checkout as workflow reference and create a separate implementation
 workspace. The PPU skills are ordinary Markdown; an agent with shell/file tools
-can read them directly. For Claude Code discovery, link them from this checkout:
+can read them directly. Their selected knowledge and references are committed
+here and can be read offline on another machine. The original author's memory
+and global skills are not required; [sources](skills/ppu-kernel-knowledge/references/sources.md)
+distinguishes included guidance from optional external evidence.
+For Claude Code discovery, link them from this checkout:
 
 ```bash
 mkdir -p ~/.claude/skills

@@ -11,7 +11,8 @@ Verbatim copies of the upstream license files referenced below are provided in
 ## PPU knowledge and profiling guidance
 
 The PPU references synthesize the owner's operator history, memory and skills.
-Their source revisions and local-memory locators are recorded in
+Their source revisions, included summaries and original-source availability
+are recorded in
 [`skills/ppu-kernel-knowledge/references/sources.md`](skills/ppu-kernel-knowledge/references/sources.md).
 Source links do not distribute SDK implementations,
 raw conversations, benchmark reports or compiled artifacts.

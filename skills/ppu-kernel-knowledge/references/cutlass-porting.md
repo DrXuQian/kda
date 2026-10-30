@@ -13,7 +13,7 @@ Keep the reusable structure and inspect the actual instantiated backend.
 | PPU CUTLASS 3.6/4.x with 10700 support | `include/ppu/ppu_include_10700.hpp`, `ppu/cute/{arch,atom}`, SM90 builders/pipelines | BF16/FP16 retain Hopper TMA/WGMMA structure; private low-bit atoms and descriptor/runtime seams need separate checks. |
 
 These trees are not interchangeable because their directory or version labels
-look similar. Earlier local memory uses `Acompute10000_*`; public actlize uses
+look similar. Earlier PPU backend trees use `Acompute10000_*`; public actlize uses
 `PPU0010_*` names. Resolve types in the selected checkout instead of installing
 another tree to satisfy a guessed spelling. Record the include path, dependency
 revision, real compiler target and generated specialization.
@@ -56,10 +56,11 @@ Model both endpoints when changing the pair, and model the converter separately.
 Use the known FP16 identity composition as a control. Do not add a second
 software unswizzle to a working matched path.
 
-The memory's host SWZL model was XOR-linear within a slice but needed a rotate
-across slices. Its int2 register pairing also disagreed with device behavior.
-This is evidence for a calibrated composition, not proof that a generic host
-fallback models the device. See [numerical debugging](numerics.md).
+The reviewed host SWZL model was XOR-linear within a slice but needed a rotate
+across slices. In the recorded PPU0010 int2 case, hardware grouped registers
+0/1 in the low N half and 2/3 in the high half; the fallback's register-parity
+pairing was wrong. Calibrate the actual lane/register map before composing it
+with a converter. See [numerical debugging](numerics.md).
 
 ## Extend a collective without changing unrelated dispatch
 

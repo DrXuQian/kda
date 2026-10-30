@@ -24,9 +24,10 @@ collection for every task.
 | Wrong values, fragment ownership, races, sub-byte pitches | [Numerical debugging](references/numerics.md) |
 
 For text search, run `rg -n -i 'topic' references` from this skill's directory.
-[Sources](references/sources.md) identifies the reviewed revisions and local
-memory notes, including corrections. Technical findings below are historical
-evidence at those sources, not a new hardware-validation campaign.
+[Sources](references/sources.md) links the included guidance to fixed external
+sources and identifies unavailable historical originals. The references here
+contain the reusable findings; no private memory or globally installed skill
+is required. Their historical evidence is not a new hardware-validation campaign.
 
 ## Apply a lesson
 

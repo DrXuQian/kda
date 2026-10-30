@@ -45,10 +45,11 @@ Do not reuse a B retile's coordinate in an A view merely because both call a
 mode K. Relate both through semantic MMA coordinates. Require full coverage
 with no unwanted duplicate owner, including high-plane and tail slots.
 
-The memory's int2 vreg-pairing correction and Sage's C-to-A bridge demonstrate
-why a convenient host simulator cannot be the only logical authority. Make a
-wrong-coordinate control fail, and reproduce the observed failure signature
-before declaring a root cause.
+The [int2 register-pairing counterexample](cutlass-porting.md#cute-cannot-check-a-layout-hidden-by-the-atom)
+and [Sage C-to-A bridge](sage-attention.md#ppu-fragment-bridge-and-compiler-boundary)
+show why a convenient host simulator cannot be the only logical authority.
+Make a wrong-coordinate control fail and reproduce the observed failure
+signature before declaring a root cause.
 
 ## Trace time as well as addresses
 
