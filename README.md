@@ -8,6 +8,11 @@ reviewed linear-attention, FlashAttention, SageAttention, Quactlize and other
 operator work. ACU and Asys are the PPU profiling tools. See the
 [document adaptation map](docs/ppu-adaptation.md) for the scope of this fork.
 
+For work directly on **ZW810 / PPU1.0**, start with
+[Run KDA on ZW810](docs/zw810.md). Give the agent a kernel entry and workload;
+it resolves the task's build, correctness and benchmark commands and executes
+the KDA loop for optimization or NVIDIA-to-PPU migration.
+
 This repository documents an early research prototype and remains under active development. Community feedback and contributions are welcome. If you are interested in HAN Lab Mafia's solutions ranking #1–3 on tracks at the MLSys Kernel Contest, see [mit-han-lab/mlsys2026-flashinfer-contest](https://github.com/mit-han-lab/mlsys2026-flashinfer-contest) for performance evaluation and reproduction.
 
 ## Contents
@@ -17,6 +22,9 @@ This repository documents an early research prototype and remains under active d
 | `docs/agent-flow.md` | Minimal end-to-end KDA workflow. |
 | `prompts/README.md` | How to use prompt templates. |
 | `prompts/basic-flow.md` | Generic starter prompt for a new task. |
+| `docs/zw810.md` | Start optimization or migration on a physical ZW810. |
+| `prompts/zw810.md` | Task prompt with agent-resolved build, validation and profiling. |
+| `scripts/inspect_zw810.py` | Record SDK/tool availability and runtime device properties. |
 | `docs/ppu-tooling.md` | PPU toolchain, profiling access and optional MCP integration. |
 | `skills/ppu-kernel-knowledge/` | PPU architecture and operator knowledge, with source references. |
 | `skills/ppu-profiling/` | ACU kernel diagnosis and Asys timeline analysis, selected by the question. |

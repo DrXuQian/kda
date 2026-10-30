@@ -41,6 +41,10 @@ For a PPU task, also record:
 - Cache policy and whether execution is on a device or a performance simulator.
 - Device/time allocation and the concrete build, validation and profiling commands.
 
+For ZW810, the [device entry](zw810.md) and [task prompt](../prompts/zw810.md)
+let the agent resolve these fields from the kernel repo and actual environment.
+The user need not supply a completed hardware profile or every command upfront.
+
 Read the relevant [PPU knowledge](../skills/ppu-kernel-knowledge/SKILL.md)
 before drafting. For a port, list preserved, adapted and unverified algorithm,
 layout, instruction, pipeline and scheduler components. Preserve the requested

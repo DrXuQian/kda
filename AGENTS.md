@@ -5,6 +5,11 @@ workflow small. PPU knowledge and tool guidance belong here; task kernels,
 datasets, private paths, reports and binaries belong in task workspaces.
 Repository-facing prose, code and comments use English.
 
+For a ZW810 task, start with `docs/zw810.md` and `prompts/zw810.md`. Inspect the
+task repo and resolve its native build, independent oracle and benchmark. Run
+the KDA loop on the requested device; general hardware-documentation gaps are
+not prerequisites when the task's required primitives can be built and tested.
+
 Read `docs/ppu-adaptation.md` before changing the workflow. Preserve KDA's
 contract / draft / plan / candidate / evidence structure. Select ACU or Asys
 by the analysis question. MCP is optional and does not change measurement
