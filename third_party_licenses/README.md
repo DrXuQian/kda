@@ -11,3 +11,4 @@ copy is recorded there.
 - `Apache-2.0-FlashInfer.txt`: FlashInfer, including its upstream component summary
 - `Apache-2.0-SGLang.txt`: SGLang
 - `Apache-2.0-vLLM.txt`: vLLM
+- `Apache-2.0-Quactlize.txt`: adapted PPU profiling and numerical-debug guidance

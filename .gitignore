@@ -4,7 +4,11 @@ runs/
 profile/
 *.ncu-rep
 *.nsys-rep
+*.acurep
+*.asysrep
 *.sqlite
+*.sqlite-wal
+*.sqlite-shm
 __pycache__/
 *.py[cod]
 .venv/

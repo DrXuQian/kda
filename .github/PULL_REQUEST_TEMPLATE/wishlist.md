@@ -1,17 +1,17 @@
 <!--
-Target the wishlist branch and use a title such as "[wishlist] RMSNorm for <project>".
+Use a title such as "[request] RMSNorm for <PPU generation>" in the PPU fork.
 Keep the full request details in the request README; a separate issue is not required.
 -->
 
 ## Request
 
-Request directory: `requests/<github-username>-<kernel-name>/`
+Task workspace or reproducible request: `<link or path>`
 
 <!--
 The directory's README should describe the project impact, input/output contract,
 correctness requirements, workloads, baseline source/version/license, environment,
-run commands, and actual validation results. baseline.py is the best-known
-comparison implementation. benchmark.py is optional; otherwise use flashinfer-bench.
+run commands, and actual validation results. Identify the best-known baseline
+implementation and entrypoint. Supply the task's PPU validation/evaluation commands.
 -->
 
 ## Summary
@@ -20,10 +20,13 @@ comparison implementation. benchmark.py is optional; otherwise use flashinfer-be
 
 ## Target hardware
 
-Currently, KDA only supports NVIDIA B200 and B300 GPUs. Select all targets that apply.
+Record the actual target; a requested target is not an admission result.
 
-- [ ] NVIDIA B200
-- [ ] NVIDIA B300
+- PPU generation and device/model: `<fill in>`
+- Native device or simulator: `<fill in>`
+- Compiler/SDK/runtime and backend revision: `<fill in>`
+- ACU/Asys versions, if reports are included: `<fill in>`
+- Correctness and measurement scope: `<fill in>`
 
 ## Related discussion (optional)
 

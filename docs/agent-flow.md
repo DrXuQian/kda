@@ -32,6 +32,20 @@ Each task should state:
 - Evaluation command, if different from validation.
 - Promotion criteria.
 
+For a PPU task, also record:
+
+- PPU generation and actual compiler target, SDK/runtime and backend revision.
+- Logical workload, physical layouts, masks, state and quantization contracts.
+- Arithmetic and rounding boundaries, independent oracle and error criteria.
+- Measurement scope: kernel, all operator kernels, public API or model phase.
+- Cache policy and whether execution is on a device or a performance simulator.
+- Device/time allocation and the concrete build, validation and profiling commands.
+
+Read the relevant [PPU knowledge](../skills/ppu-kernel-knowledge/SKILL.md)
+before drafting. For a port, list preserved, adapted and unverified algorithm,
+layout, instruction, pipeline and scheduler components. Preserve the requested
+implementation structure; an incomplete port cannot establish a hardware limit.
+
 ## Evidence Records
 
 Use simple files in the task workspace:
@@ -45,6 +59,23 @@ Use simple files in the task workspace:
 
 The exact format is less important than consistency. A future reader should be able to reconstruct what changed, what was measured, and why a candidate was promoted.
 
+Bind each PPU result to the source/diff, dependency, binary, input, selected
+kernel and toolchain. Label host checks, native compilation, simulator
+correctness/performance and physical-device results separately. Keep the
+original ACU/Asys reports so analysis can be corrected without repeating capture.
+
+Use [PPU profiling](../skills/ppu-profiling/SKILL.md): Asys for a timeline
+question and ACU for a kernel-counter question.
+Profiling is selected to answer the current uncertainty; it is not mandatory
+after every edit. Clean evaluation and instrumented profiling are separate
+measurement contexts.
+
 ## Promotion Rule
 
 Promote a candidate only when it satisfies the task contract and has evidence that it improves or preserves the target metric. If a candidate is rejected, record the reason instead of silently discarding it.
+
+A numeric failure invalidates that candidate's timing. Historical winners and
+NVIDIA controls suggest experiments; matched PPU results decide PPU promotion.
+Extend a winner only to the validated shape/type/operator scope. Missing tools
+or unmeasured paths remain explicit gaps. Record the incumbent, failed ideas
+and next discriminating experiment when handing off incomplete work.

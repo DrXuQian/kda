@@ -1,6 +1,12 @@
-# Kernel Design Agents
+# Kernel Design Agents for PPU
 
 Kernel Design Agents (KDA) is an agent-centric workflow for using coding agents to research, implement, verify, and iterate on performance-sensitive CUDA kernel tasks.
+
+This downstream fork applies the same workflow to PPU. It retains the task
+contract, draft, plan, candidate and evidence loop. PPU knowledge comes from
+reviewed linear-attention, FlashAttention, SageAttention, Quactlize and other
+operator work. ACU and Asys are the PPU profiling tools. See the
+[document adaptation map](docs/ppu-adaptation.md) for the scope of this fork.
 
 This repository documents an early research prototype and remains under active development. Community feedback and contributions are welcome. If you are interested in HAN Lab Mafia's solutions ranking #1–3 on tracks at the MLSys Kernel Contest, see [mit-han-lab/mlsys2026-flashinfer-contest](https://github.com/mit-han-lab/mlsys2026-flashinfer-contest) for performance evaluation and reproduction.
 
@@ -11,35 +17,51 @@ This repository documents an early research prototype and remains under active d
 | `docs/agent-flow.md` | Minimal end-to-end KDA workflow. |
 | `prompts/README.md` | How to use prompt templates. |
 | `prompts/basic-flow.md` | Generic starter prompt for a new task. |
+| `docs/ppu-tooling.md` | PPU toolchain, profiling access and optional MCP integration. |
+| `skills/ppu-kernel-knowledge/` | PPU architecture and operator knowledge, with source references. |
+| `skills/ppu-profiling/` | ACU kernel diagnosis and Asys timeline analysis, selected by the question. |
+| `docs/huggingface-export.md` | Upstream export for validated CUDA CuTe-DSL candidates. |
+| `docs/ppu-artifacts.md` | PPU native library packaging and artifact handoff. |
 | `CLAUDE.md` | Repository-facing agent instructions. |
 | `CONTRIBUTING.md` | Contribution process and DCO sign-off requirements. |
 | `THIRD_PARTY_NOTICES.md` | Third-party component and license disclosures. |
 | `third_party_licenses/` | Verbatim upstream license files for distributed third-party components. |
 
-## Community Kernel Wishlist
+## Kernel Requests
+
+For PPU work, use the [request template](.github/PULL_REQUEST_TEMPLATE/wishlist.md)
+in this fork. Record the PPU generation, compiler/runtime, input contract,
+representative workload, baseline and commands. A request does not establish
+that a kernel is supported or measured on that generation.
+
+### Upstream Community Wishlist
 
 Have a kernel that needs optimization? [Submit a request](https://github.com/NVlabs/kda/tree/wishlist#submit) directly as a pull request to `wishlist`, with a reproducible definition, representative workloads, and your best-known baseline implementation. No issue is required. The community wishlist currently supports NVIDIA B200 and B300 GPUs only.
 
-[Browse and upvote requests](https://github.com/NVlabs/kda/pulls?q=is%3Apr%20base%3Awishlist), [discuss an idea](https://github.com/NVlabs/kda/issues/new?title=%5Bwishlist%5D%20) if you need help preparing the files, or visit the [project website](https://nvlabs.github.io/kda/). Keep request details in `requests/<github-username>-<kernel-name>/README.md` and use the [wishlist PR template](.github/PULL_REQUEST_TEMPLATE/wishlist.md) for the short description. Merging records the request, while optimization progress and result links remain on the original pull request. Website source lives on `pages`; the PR template and issue chooser settings are maintained on `main`.
+[Browse and upvote requests](https://github.com/NVlabs/kda/pulls?q=is%3Apr%20base%3Awishlist), [discuss an idea](https://github.com/NVlabs/kda/issues/new?title=%5Bwishlist%5D%20) if you need help preparing the files, or visit the [project website](https://nvlabs.github.io/kda/). Keep request details in `requests/<github-username>-<kernel-name>/README.md` and use the [upstream wishlist PR template](https://github.com/NVlabs/kda/blob/ef6ce61/.github/PULL_REQUEST_TEMPLATE/wishlist.md) for the short description. Merging records the request, while optimization progress and result links remain on the original pull request. Website source lives on `pages`; the PR template and issue chooser settings are maintained on `main`.
 
 ## Getting Started
-Install the agent workflow dependencies before starting the agent session:
+Use this checkout as workflow reference and create a separate implementation
+workspace. The PPU skills are ordinary Markdown; an agent with shell/file tools
+can read them directly. For Claude Code discovery, link them from this checkout:
 
 ```bash
-git clone --recurse-submodules https://github.com/mit-han-lab/kernel-design-agents.git
-cd kernel-design-agents
-
-# link skills
 mkdir -p ~/.claude/skills
-ln -s "$(pwd)/skills/ncu-report-skill" ~/.claude/skills/ncu-report-skill
-ln -s "$(pwd)/skills/KernelWiki" ~/.claude/skills/KernelWiki
-
-# or clone the independently licensed ncu skill directly
-mkdir -p ~/.claude/skills && cd ~/.claude/skills
-git clone https://github.com/mit-han-lab/ncu-report-skill.git
+ln -s "$(pwd)/skills/ppu-kernel-knowledge" ~/.claude/skills/ppu-kernel-knowledge
+ln -s "$(pwd)/skills/ppu-profiling" ~/.claude/skills/ppu-profiling
 ```
 
-Use KernelWiki from this repository's pinned submodule. A direct upstream
+Use the selected PPU SDK/runtime and the target repository's existing build,
+correctness and evaluation commands. Fill in [the basic prompt](prompts/basic-flow.md)
+and start the agent in the implementation workspace. Read only the knowledge
+pages relevant to that task. MCP is optional; see [tool access](docs/ppu-tooling.md).
+
+The original NVIDIA skills remain useful for algorithms, CuTe, tiling,
+pipelines, diagnosis and NVIDIA baselines. Apply the
+[PPU coverage and differences](docs/ppu-adaptation.md#knowledge-coverage-and-gaps)
+before transferring hardware-specific advice. Initialize their pinned submodules
+when needed. Use
+KernelWiki from this repository's pinned submodule. A direct upstream
 checkout may contain artifact snapshots governed by additional terms that are
 omitted from this distribution.
 
@@ -54,7 +76,8 @@ The following third-party projects are included as Git submodules. The source UR
 
 These submodules are not covered by this repository's first-party license. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the applicable license text and additional details.
 
-Install the `humanize` Claude Code plugin from the Claude Code plugin UI:
+If using Humanize for the planning step, install it through the Claude Code
+plugin UI. A manually maintained executable plan also satisfies the flow:
 
 ```text
 /plugin marketplace add PolyArch/humanize
@@ -72,9 +95,13 @@ Install the `humanize` Claude Code plugin from the Claude Code plugin UI:
 7. Implement in small iterations, verifying after each meaningful change.
 8. Record candidates, benchmark or evaluation results, profiling evidence, and final promotion decisions.
 
-The workflow is intentionally independent of any single benchmark harness or hardware target. A downstream task can add its own evaluator, datasets, profiling tools, and domain-specific references.
+The workflow is independent of any single benchmark harness. PPU generation,
+numerics, measurement scope and promotion criteria belong in the task contract.
+Existing operator evaluators remain authoritative for their tasks.
 
 Validated CuTe candidates can be [exported as Hugging Face kernels](docs/huggingface-export.md).
+For native PPU libraries, use the [PPU artifact handoff](docs/ppu-artifacts.md)
+and the operator repository's existing SDK builder.
 
 ## Recommended Workspace Layout
 

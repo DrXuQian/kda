@@ -8,6 +8,26 @@ bundle provenance records remain applicable.
 Verbatim copies of the upstream license files referenced below are provided in
 [`third_party_licenses/`](third_party_licenses/README.md).
 
+## PPU knowledge and profiling guidance
+
+The PPU references synthesize the owner's operator history, memory and skills.
+Their source revisions and local-memory locators are recorded in
+[`skills/ppu-kernel-knowledge/references/sources.md`](skills/ppu-kernel-knowledge/references/sources.md).
+Source links do not distribute SDK implementations,
+raw conversations, benchmark reports or compiled artifacts.
+
+The PPU profiling skill and its ACU references, and the PPU numerical-debug reference,
+adapt guidance from [Quactlize](https://github.com/DrXuQian/quactlize), under
+Apache-2.0. Those files carry SPDX notices and retain Apache-2.0 rather than
+the first-party documentation license. The original license text is in
+[`third_party_licenses/Apache-2.0-Quactlize.txt`](third_party_licenses/Apache-2.0-Quactlize.txt).
+They are edited syntheses, not verbatim synchronized exports. Other PPU pages
+cite the historical technical findings they summarize.
+
+The upstream KDA workflow, both pinned NVIDIA skill submodules and their
+existing attribution inventory below remain intact. The PPU skills do not
+claim NVIDIA endorsement or upstream PPU hardware support.
+
 ## Included Git Submodules
 
 ### KernelWiki

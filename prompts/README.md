@@ -4,6 +4,13 @@ This directory stores generic prompts for the Kernel Design Agents workflow.
 
 The templates are intentionally task-agnostic. Fill in the task objective, constraints, validation command, and promotion criteria before starting an agent session in a separate implementation workspace.
 
+The basic prompt includes PPU environment and measurement fields. They apply
+to linear attention, FlashAttention, SageAttention, GEMM/GEMV, MoE and other
+operators without fixing a particular harness, performance target or runtime.
+Select the relevant knowledge and profiler skills through
+[PPU tooling](../docs/ppu-tooling.md). CLI access is sufficient; an existing
+MCP is an optional way to expose the same tools.
+
 ## Available Templates
 
 | Path | Purpose |

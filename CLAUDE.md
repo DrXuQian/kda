@@ -1,6 +1,8 @@
 # Agent Instructions
 
-This repository is the generic Kernel Design Agents workflow reference. It should stay small and task-agnostic.
+This repository is the PPU adaptation of Kernel Design Agents. It keeps the
+upstream workflow and task-workspace boundary. Read [AGENTS.md](AGENTS.md) and
+the [adaptation map](docs/ppu-adaptation.md) for this fork's scope.
 
 ## Repository Rules
 
@@ -31,3 +33,8 @@ Use external skills only when they are relevant to the active task:
 - `humanize` for plan generation and implementation loops.
 - A domain knowledge skill for background research.
 - A profiling or report-analysis skill for performance evidence.
+
+For PPU, use `skills/ppu-kernel-knowledge/SKILL.md` and
+`skills/ppu-profiling/SKILL.md`. Read only the references needed for the task.
+Keep useful KernelWiki/NCU algorithms and methods; check their hardware
+premises against the PPU architecture and CUTLASS/actlize references.

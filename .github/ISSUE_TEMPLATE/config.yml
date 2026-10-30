@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Submit a kernel request
+  - name: Define a PPU kernel task
+    url: https://github.com/DrXuQian/kda/blob/main/prompts/basic-flow.md
+    about: Supply the PPU target, workload, baseline and validation commands.
+  - name: Upstream NVIDIA kernel wishlist
     url: https://github.com/NVlabs/kda/tree/wishlist#submit
-    about: Files ready? Submit a pull request directly to wishlist; no issue is required.
+    about: The upstream wishlist accepts NVIDIA B200/B300 requests under its own policy.
