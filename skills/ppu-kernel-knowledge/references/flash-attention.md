@@ -1,7 +1,21 @@
 # FlashAttention
 
-Sources: [S01, S02, S03, S05](sources.md). Separate the PPU1.0/1.5 AIU path
-from the explicit PPU1.7 Hopper path before selecting primitives or tuning.
+Sources: [S01, S02, S03, S05, S15](sources.md). Separate public PPU1.0/1.5
+implementations from the historical PPU1.7 Hopper experiment below.
+
+## Official PPU starting point
+
+Use [t-head/flash-attention-for-sail v2.8.2](https://github.com/t-head/flash-attention-for-sail/tree/v2.8.2)
+when the task needs an existing PPU implementation. Its README lists 810/810E
+and M890 among supported products, FP16/BF16 forward/backward, head dimensions
+up to 256, and FP8 forward for FA3. Feature availability still follows the
+selected generation and dispatch: ppu001 does not gain tc02 FP8 from a broad
+repository support statement. Inspect the exact build and specialization.
+
+The public FA2/FA3 adaptation uses PPU operand delivery and scheduling. A
+`hopper/` directory or FA3 algorithm does not make it the historical 10700
+TMA/WGMMA port. Keep NVIDIA upstream as an algorithm/oracle reference and
+validate the official PPU baseline before optimizing it.
 
 ## Algorithm contract
 
@@ -32,7 +46,7 @@ must match the tested PPU layout. The bridge from accumulator to next MMA A
 is also target-specific; reuse the actual traits and mapping proof, not a
 NVIDIA shuffle pattern. See [SageAttention](sage-attention.md).
 
-## PPU1.7 Hopper path
+## Historical PPU1.7 Hopper path
 
 Start with the existing Hopper collective, TMA/WGMMA pipeline and scheduler.
 Audit build target, dependency API, descriptors, barrier arrivals, retirement,

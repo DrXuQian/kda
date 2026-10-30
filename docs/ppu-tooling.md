@@ -51,6 +51,16 @@ MCP is optional. The same skills can use a discovered ACU/Asys MCP or the
 CLI/Python path. No profiler MCP is required by the upstream KDA loop or its
 bundled NCU skill.
 
+Asight2.2.0 supplies an official Asys MCP through its GUI and the
+`asys_mcp_server` program. The documented local stdio launch is
+`asys_mcp_server --mode stdio`; HTTP is also supported. Use the installed
+server's help/schema and the [official setup guide](https://developer.t-head.cn/docs_center/doc_detail/index.html?projectId=1&chapterId=709).
+This capability is documented, not installed or exercised by this repository's
+SDK2.1.1 review. An existing official server can provide report access without
+building a custom adapter. ACU also has a documented
+[`acu_report` Python interface](../skills/ppu-profiling/references/metrics.md#documented-python-report-interface)
+in addition to the tested CLI/rules.
+
 If a PPU MCP already exists, inspect its actual tool schemas. Useful
 capabilities are report discovery, kernel/range enumeration, metric
 enumeration with units, filtered counter queries, timeline correlation and

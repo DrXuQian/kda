@@ -2,7 +2,7 @@
 
 # ACU metrics and statistics rules
 
-Source: [S10](../../ppu-kernel-knowledge/references/sources.md), SDK2.1.1,
+Sources: [S10, S14](../../ppu-kernel-knowledge/references/sources.md), SDK2.1.1,
 ACU `v2.1.1_20260725-15d8b9d`, data15000. These names were found in an actual
 report and checked against installed sections where applicable. They are lookup
 examples, not a complete or cross-version metric contract.
@@ -17,6 +17,10 @@ examples, not a complete or cross-version metric contract.
 | Register/shared residency limits | `launch__occupancy_limit_registers`, `launch__occupancy_limit_shared_mem` |
 | KVD load-side traffic toward L2 | `kvd__bytes_load_pipe_l2.sum` |
 | DRAM bytes read | `dram__bytes_read.sum` |
+| LLC request hit rate | `llc__requests_hit_rate.pct` |
+| LLC/Fabric global-load bytes | `llc__bytes_pipe_fabric_mem_global_op_ld.sum` |
+| LLC/Fabric global-store bytes | `llc__bytes_pipe_fabric_mem_global_op_st.sum` |
+| LLC load misses toward DRAM | `llc__transactions_pipe_dram_mem_global_op_ld_lookup_miss.sum` |
 | AIU load transactions | `aiu__transactions_load.avg` |
 | Shared-load bank conflicts | `tsm__bank_conflicts_pipe_lsu_mem_shared_op_ld.sum` |
 | Commit-dependency stall ratio | `pu__we_average_warps_issue_stalled_commit_dependency_per_issue_active.ratio` |
@@ -27,21 +31,35 @@ tool/metric definitions before converting values. Missing is not zero. The
 `cu`, `pu`, `kvd`, `tsm` and `aiu` families are not a textual replacement of
 NCU's SM/L1TEX families.
 
-The supplied [hardware comparison](../../ppu-kernel-knowledge/references/memory-hierarchy.md)
-([S12](../../ppu-kernel-knowledge/references/sources.md)) distinguishes a
-four-CU shared L2 from a wider LLC, but does not identify its PPU model.
-Bind the topology and each counter to the actual target: endpoint, direction,
-per-unit versus aggregate scope, bytes/transactions and clock domain. KVD-to-L2
-bytes are not automatically HBM bytes. Do not derive LLC hits by subtracting
-unmatched counters or substitute a combined read/write peak for a read peak.
-No LLC metric name or SDK `l2CacheSize` sharing scope is established by that
-diagram; inspect the selected SDK/model definition before using either.
+The official ACU memory chart identifies KVD as vector data cache and KSD as
+scalar data cache, grouped with TSM in its L1 analysis view. HGGC documents
+per-CU L1, CE-shared L2 and wider LLC; see [memory hierarchy](../../ppu-kernel-knowledge/references/memory-hierarchy.md).
+Bind each counter to its endpoint, direction, aggregation, byte/transaction
+unit and clock domain. KVD-to-L2 bytes are not HBM bytes. Do not derive LLC hits
+by subtracting unmatched counters or add traffic measured at successive
+boundaries. A combined read/write peak is not a read peak. SDK `l2CacheSize`
+still needs a confirmed aggregation scope before use as a cache-capacity model.
 
 Installed definitions are under `asight/sections`, including `SpeedOfLight`,
 `Occupancy`, `InstructionStatistics`, `MemoryWorkloadAnalysis` and
 `WarpStateStatistics`. Query only the needed metrics. `--query-metrics` is a
 device-capability query; inspecting an existing report or section files does
 not require initializing a PPU.
+
+## Documented Python report interface
+
+Asight2.2.0 documents `acu_report` under `$PPU_SDK/asight/extras/python`,
+for Python 3.8+. Add the installed directory to `PYTHONPATH` when using it.
+`load_report(path)` returns a context; enumerate ranges and actions before
+selecting a kernel. An action exposes `metrics()` and `metric_by_name(name)`.
+For a selected metric, retain `value()`, `unit()`, `description()` and
+`rollup_operation()`. Typed accessors must match the metric's type.
+
+This is an official PPU interface, not an inferred `ncu_report` compatibility
+layer. It was absent from the local SDK2.1.1 installation used here, so these
+API calls are documentation-backed rather than locally exercised. Use the
+tested CSV/rule paths below where that module is unavailable. See the
+[official reference](https://developer.t-head.cn/docs_center/doc_detail/index.html?projectId=1&chapterId=721).
 
 ## Programmatic analysis through the SDK
 

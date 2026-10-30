@@ -18,6 +18,7 @@ For optimization or NVIDIA-to-PPU migration on a physical ZW810, use the
 | Task or symptom | Read |
 |---|---|
 | PPU target, MMA/copy semantics, native lowering, Hopper port | [Architecture](references/architecture.md) |
+| TIX instruction selection, tc01/tc02, AIU tails, cache modifiers and async completion | [TIX porting](references/tix-porting.md) |
 | CU/SM comparison, KVD/TSM, L2/LLC reuse, bandwidth scope | [Memory hierarchy](references/memory-hierarchy.md) |
 | NVIDIA CUTLASS to actlize, builder dispatch, CuTe copy/fragment contracts | [CUTLASS and actlize](references/cutlass-porting.md) |
 | Gated DeltaNet, chunking, recurrent state, WY/residual | [Linear attention](references/linear-attention.md) |
@@ -26,6 +27,7 @@ For optimization or NVIDIA-to-PPU migration on a physical ZW810, use the
 | K-pack, GGUF, bitplanes, cold GEMV, scale/zero | [Quantization and GEMV](references/quantization.md) |
 | Dense/grouped GEMM, MoE, tile and scheduler choices | [GEMM and MoE](references/gemm-moe.md) |
 | Wrong values, fragment ownership, races, sub-byte pitches | [Numerical debugging](references/numerics.md) |
+| Official manuals, public PPU backends, unresolved documentation conflicts | [Official documentation](references/official-docs.md) |
 
 For text search, run `rg -n -i 'topic' references` from this skill's directory.
 [Sources](references/sources.md) maps the included PPU documentation and official

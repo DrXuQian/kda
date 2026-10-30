@@ -1,6 +1,6 @@
 # Quantization, offline formats and GEMV
 
-Sources: [S01, S08, S12](sources.md). Scope is the recorded Quactlize/PPU0010
+Sources: [S01, S08, S12, S13, S14](sources.md). Scope is the recorded Quactlize/PPU0010
 format and reader work, with a separately scoped cache-topology reference.
 Read the current producer, descriptor and selected kernel before applying a
 historical configuration.
@@ -51,10 +51,10 @@ Split-K reduction in full-call timing and retain a strong unsplit control.
 Name the cache level being made cold and use its verified capacity with a
 documented eviction/rotation protocol. The historical harness used a ring at
 least 2.25 times the capacity it called L2, with complete traversals; that
-setting does not establish the cache topology on another target. The supplied
-[hardware comparison](memory-hierarchy.md) distinguishes near-CU L2 from LLC.
-If that topology applies, exceeding only the nearby L2 cannot establish
-HBM-cold weights. Check the selected SDK's capacity meaning and available
+setting does not establish the cache topology on another target. Official HGGC
+[cache guidance](memory-hierarchy.md) distinguishes CE-shared L2 from LLC.
+Exceeding only the nearby L2 cannot establish HBM-cold weights. Check the
+selected SDK's capacity meaning, ACU's [cache policy](../../ppu-profiling/references/collection.md#cache-and-clock-policy), and available
 miss/downstream-traffic evidence. Keep event timing distinct from ACU
 forced-cold replay and model Asys timing. Alternate arms, retain raw
 distributions and classify missing/invalid rows separately from regressions.

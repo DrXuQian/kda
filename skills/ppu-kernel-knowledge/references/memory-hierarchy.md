@@ -1,24 +1,23 @@
 # PPU memory hierarchy and the Hopper comparison
 
-Source: [S12](sources.md), adapted from the user-supplied
-`PPU架构与NVIDIA_SM对照.md`, reviewed on 2026-10-30. That text summarizes
-architecture diagrams without identifying the PPU SKU or generation. This
-page includes the relevant observations and their limits; the original file
-and diagrams are not reading prerequisites. None of its capacities or rates
-is a ZW810 default until the model is identified. The independent PPU0010
-[instruction and resource evidence](architecture.md) retains its own scope.
+Sources: [S12, S13, S14](sources.md), reviewed on 2026-10-30. Official HGGC,
+M890 and Asight documentation now establishes the topology and several roles
+that the user-supplied `PPU架构与NVIDIA_SM对照.md` left open. The numeric
+annotations from that unidentified diagram are retained separately below.
+See the [official document map](official-docs.md) and
+[target resource evidence](architecture.md#resources-and-evidence).
 
 ## Match roles and sharing domains
 
-| PPU element in the supplied summary | NVIDIA comparison | Consequence for a port |
+| PPU element | Documented role / NVIDIA comparison | Consequence for a port |
 |---|---|---|
-| CU | SM as a coarse compute-unit analogy | Establish the actual CTA residency and resource-allocation domain before computing occupancy. |
+| CU | HGGC places a complete CTA on one CU, using 32-thread warps; broadly comparable to SM execution scope | Use the target's resource and allocation limits for occupancy. |
 | WS and WE; repeated `P00, WS+2WE` labels | Scheduler and execution roles within an SM | A WE is not one CUDA Core or one SM. Repeated read/write drawings do not establish a partition count. |
-| TSM | Software-managed shared storage | Capacity, bank mapping, visibility, barriers and copy semantics require target evidence. |
-| KVD, connected to AIU/LSU and L2 | A memory-path component with no established one-to-one match | Do not rename it NVIDIA L1/L1TEX or infer a cache capacity from its traffic counters. |
-| 512 KB L2 shared by four CUs | A cache near a group of compute units | It is neither a private per-SM L1 nor the chip-wide NVIDIA L2. |
-| Partitioned LLC, labeled 64 MB total | Closest functional comparison to NVIDIA's chip-wide L2 | Revisit NVIDIA L2 reuse and weight-residency strategies at this sharing scope. |
-| AIU in the illustrated read path | Insufficient evidence for a Tensor Core mapping | Determine MMA shapes and execution resources from the backend/ISA, not the memory diagram. |
+| TSM | CTA-shared storage, separate from the global-cache hierarchy | Check both 32-bank/four-byte-bank behavior and generation-specific group contention. |
+| KVD / KSD | Asight identifies vector/scalar data caches; HGGC places L1 at CU scope | Asight's L1 chart groups KVD, KSD and TSM for analysis; that does not imply Hopper's unified capacity pool or interchangeable NCU metrics. |
+| CE-shared L2 | A cache near a group of compute units; M890 documents four-CU CEs | It is neither per-CU L1 nor the chip-wide NVIDIA L2. |
+| LLC shared across CEs | Closest functional comparison to NVIDIA's chip-wide L2 | Revisit NVIDIA L2 reuse and weight-residency strategies at this sharing scope. |
+| AIU / TFU | AIU moves tensors to TSM; TFU performs tensor computation | Keep data-delivery cost distinct from matrix execution throughput. |
 
 Hopper's L1/texture/shared storage is a combined 256 KB pool per SM; its
 shared-memory limits are 228 KB/SM and 227 KB/block, not an additional pool.
@@ -29,15 +28,22 @@ The [Nsight Compute SM model](https://docs.nvidia.com/nsight-compute/ProfilingGu
 describes four SM subpartitions with schedulers; it does not determine PPU's
 WS/WE organization or warp width.
 
-The summarized global-read request path is
+The uploaded summary's illustrated global-read request path is
 `WS -> AIU -> KVD -> L2 -> Fabric -> LLC -> external memory`; writes use
 `WS -> LSU -> KVD` before that hierarchy. TSM has a separate execution-side
 read/write path. These paths do not establish every opcode's cache/bypass
 policy, write allocation, coherence or completion rules.
 
-## Diagram annotations, with their original scope
+The official guides describe the L1/CE-L2/LLC hierarchy for ppu001/ppu0015;
+M890's product table gives 39 CUs for OAM and 30 for M530 PCIe. Neither the
+text nor its reviewed architecture figure binds the following 288 GB diagram
+to those products. The runtime API calls `l2CacheSize` an L2 byte capacity,
+without specifying per-CE versus aggregate scope; do not treat it as LLC size.
 
-Keep the supplied KB/MB/GB labels until their byte convention is confirmed.
+## Unidentified diagram annotations
+
+The supplied summary does not identify its PPU SKU or generation. Its values
+are not ZW810 defaults. Keep KB/MB/GB labels until their byte convention is confirmed.
 Interface width, bytes per cycle, clock domain and sustained bandwidth are
 different quantities.
 
@@ -49,7 +55,7 @@ different quantities.
 | LLC channels | 1 MB/channel, 32 channels/die; 64 B/cycle per channel to Fabric | Preserve channel, die and direction scopes; the total is not one channel's rate. |
 | LLC aggregate | 64 MB; about 12 TB/s at 1.5 GHz, **read plus write** | Not a 12 TB/s read ceiling. Die count and aggregation still need confirmation. |
 | LLC-to-memory-controller path | `3 * 32 B -> CDC -> 3 * 16 B -> CDC -> 3 * 32 B`; middle clock is higher | Compare width times the corresponding clock, not widths alone. |
-| TSM to/from two WEs | Two 64 B read paths; two 32 B write paths | These are byte widths. The summary does not establish cycles, CU-wide throughput or bank organization. |
+| TSM to/from two WEs | Two 64 B read paths; two 32 B write paths | These are byte widths; binding them to the public bank/group model or CU-wide throughput requires the diagram's target. |
 | HBM3 | 288 GB; 1 TiB/s per stack, 6 TiB/s total; 8 Gbps | Unidentified product and unresolved bandwidth units; do not use as a ZW810 roofline denominator. |
 
 Four 256 B/cycle CU interfaces do not establish 1024 B/cycle through the

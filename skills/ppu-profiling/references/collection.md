@@ -2,7 +2,7 @@
 
 # ACU collection and import
 
-Source anchors: [S04, S06, S08, S10](../../ppu-kernel-knowledge/references/sources.md).
+Source anchors: [S04, S06, S08, S10, S14](../../ppu-kernel-knowledge/references/sources.md).
 Resolve paths from the task and selected SDK; no host name or GPU ordinal is
 a framework default.
 
@@ -60,6 +60,21 @@ required reducer, quantizer or fill from a full-operation comparison.
 Keep physical-device timing runs sequential and separate from profiling.
 For a simulator restricted to one target invocation, use its provided
 single-call application and trace protocol instead of this replay recipe.
+
+## Cache and clock policy
+
+The official ACU2.1.1/2.2.0 guide documents `--cache-control all` as flushing
+L1, L2 and LLC before kernel replay. Its `none` descriptions conflict: the
+table says L1/L2 still flush, while the prose says flushing is disabled.
+Record the actual version/mode and confirm behavior before describing a run
+as preserving all warm caches. Report replay/checkpoint does not restore cache
+contents. A cold replay and the application's clean warm timing answer
+different questions; see the [remaining questions](../../ppu-kernel-knowledge/references/official-docs.md#remaining-questions-for-the-perf-model).
+
+Record clock policy separately. The guide says `--clock-control none` leaves
+clocks unchanged; `base` locks supported clocks and requires privilege. Do not
+copy its example base frequency to another SKU or silently change the device's
+clock policy for a comparison.
 
 ## Import checks
 

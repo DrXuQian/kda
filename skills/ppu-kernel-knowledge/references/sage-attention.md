@@ -1,6 +1,6 @@
 # SageAttention
 
-Sources: [S06, S07](sources.md), with [S01/S02](sources.md) for the original
+Sources: [S06, S07, S13](sources.md), with [S01/S02](sources.md) for the original
 PPU bridge. Algorithm and target changes need separate evidence.
 
 ## PPU1.0 INT8-QK / FP16-PV contract
@@ -48,6 +48,10 @@ while preserving each output's accumulation order. Its spill reduction was
 native compile evidence; latency still required a device measurement.
 
 ## Low-bit experimental targets
+
+The official [TIX contract](tix-porting.md) now documents ppu0015 tc02 FP8
+and MXFP4 (E2M1 with E8M0, K=32 scale groups). Use that public contract for
+a new ppu0015 task; it does not establish UE4M3 NVFP4 or a PPU1.7 backend.
 
 The reviewed experimental PPU1.5 INT8/FP8 and PPU1.7 FP4 work has separate
 evidence from the PPU1.0 case. Native1.5 compilation and 1.7 source checks were

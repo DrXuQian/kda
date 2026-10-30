@@ -1,6 +1,6 @@
 # CUTLASS, actlize and PPU backend differences
 
-Sources: [S01, S03, S05, S08, S11](sources.md). actlize retains CUTLASS/CuTe's
+Sources: [S01, S03, S05, S08, S11, S13, S15](sources.md). actlize retains CUTLASS/CuTe's
 layered design but changes architecture atoms, builders and operand delivery.
 Keep the reusable structure and inspect the actual instantiated backend.
 
@@ -24,6 +24,11 @@ historical fixes require task-owned implementation rather than a fork dependency
 These are scoped source observations, not new device measurements or hardware
 limitations. Preserve the official dependency and keep necessary extension
 patches with the task. Do not select a personal fork as an implicit repair.
+
+The public TIX guide specifies the missing FP16-output instruction, and a
+local SDK2.1.1 probe emitted native `v.mma.f16.f16.m16n16k16` for PPU1.0.
+See [TIX evidence](tix-porting.md). Implementing the wrapper still requires
+correct independent accumulator bindings, fragment validation and device tests.
 
 ## Choose the tree before choosing an atom
 

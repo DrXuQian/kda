@@ -44,6 +44,6 @@ Use the selected SDK's CLI/report API or a discovered MCP exposing it. See
 [tool access](../../docs/ppu-tooling.md). MCP is optional. A single-invocation
 simulator contract requires its own trace protocol instead of profiler replay.
 
-Sources: [S04, S06, S08, S10](../ppu-kernel-knowledge/references/sources.md).
+Sources: [S04, S06, S08, S10, S14](../ppu-kernel-knowledge/references/sources.md).
 Adapted Quactlize guidance retains Apache-2.0; see
 [notices](../../THIRD_PARTY_NOTICES.md).

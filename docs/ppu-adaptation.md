@@ -42,7 +42,7 @@ The bundled NCU reference documents were evaluated by responsibility as well:
 | `00-directory-layout.md`, `01-workflow.md` | Keep one per-run reports/analysis and evidence-to-plan flow in `ppu-profiling`. |
 | `02-harness-guide.md` | Reuse the task's real entry/inputs and native build; preserve multi-kernel scope when that is the metric. Do not force a copied standalone kernel or NVIDIA architecture flag. |
 | `03-collection.md` | Use verified ACU CLI options and PPU replay/cache policy; Asys has its own capture/export commands. |
-| `04-python-api.md` | Use ACU CSV or the SDK's `HgRules` statistics interface; no assumed `ncu_report` compatibility. |
+| `04-python-api.md` | Use ACU CSV, `HgRules`, or the official Asight2.2.0 `acu_report` interface when installed; no assumed `ncu_report` compatibility. |
 | `05-analysis-dimensions.md` | Keep the questions about residency, work, memory and stalls; derive metrics, resources and thresholds from PPU. Asys provides call timelines, not automatically per-CU PM samples. |
 | `06-diagnosis-playbook.md` | Use scoped PPU counterexamples and controlled hypotheses. Do not copy fixed B200 percentages, bank rules or automatic fixes. |
 | `07-report-template.md` | Retain identity, measurements, diagnosis and ranked next experiments, with PPU evidence tiers and full-call scope. |
@@ -83,48 +83,40 @@ formats, alongside algorithms and optimization techniques. The NCU companion
 adds a B200/H100 resource table, memory/compute peaks and diagnosis dimensions.
 These define the questions to answer for PPU, not values to copy into a PPU card.
 
-PPU1.0 is a primary target of this collection. Its native MMA, AIU/SWZL,
-actlize, CuTe debugging and attention/GEMM/GEMV/MoE evidence supply much of
-the current knowledge. Its resource coverage is still partial: known occupancy
-limits and historical card measurements do not constitute a complete hardware
-profile. The gap review below includes PPU1.0 as well as PPU1.5/1.7.
+PPU1.0 is a primary target. Its native MMA, AIU/SWZL, actlize, CuTe debugging
+and operator evidence are now joined by official HGGC/TIX and Asight manuals.
+The [official document map](../skills/ppu-kernel-knowledge/references/official-docs.md)
+records reviewed versions, public implementation starting points and specific
+documentation conflicts. Keep architectural rules separate from SKU quantities
+and historical measurements. The review covers PPU1.0 and 1.5; 1.7 remains a
+separately scoped historical source/model path.
 
 | Information needed | Evidence in the included material | KDA use / remaining gap |
 |---|---|---|
-| Device resources and performance model | PPU0010 occupancy limits, historical card values and ACU resource counterexamples | [Architecture](../skills/ppu-kernel-knowledge/references/architecture.md) records their scope. The SKU-specific profile remains partial for 1.0; complete profiles are missing for 1.5/1.7. |
-| Cache topology and interface bandwidth | Supplied PPU/Hopper summary: four-CU shared L2, Fabric, partitioned LLC, separate TSM path and scoped interface annotations | [Memory hierarchy](../skills/ppu-kernel-knowledge/references/memory-hierarchy.md) includes the usable comparison. Its SKU/generation, cache policies, clock domains and several unit/aggregation details remain unresolved; its numbers do not complete the ZW810 profile. |
+| Device resources and performance model | Official warp/CTA limits, 810E/M890 product examples and historical ACU resource counterexamples | [Architecture](../skills/ppu-kernel-knowledge/references/architecture.md) distinguishes the 64K/128K register discrepancy, allocation questions and SKU values. Complete per-SKU performance models remain unavailable. |
+| Cache topology and interface bandwidth | HGGC: per-CU L1, CE-shared L2, shared LLC; Asight: KVD/KSD roles; shared banks/groups; scoped uploaded diagram | [Memory hierarchy](../skills/ppu-kernel-knowledge/references/memory-hierarchy.md) supplies topology and scope. Diagram identity, cache capacities/aggregation, clocks and sustained rates still need target evidence. |
 | Compiler target and native instruction path | Old wrapper-target failure; native 1.0/1.5 builds; 1.7 source/model work | Keep build contracts separate. The reviewed SDK cannot establish native 1.7 compilation. |
-| MMA shape, dtype and fragment ownership | FP16/INT8 n16 maps, plain/SWZL load differences, 10700 FP8/FP4 interfaces | Use target traits and device/native probes. Do not assume SM80 or SM90 register order. |
-| Global/shared movement and layouts | Plain cp.async, AIU/SWZL pairing, converter reorder, TMA descriptor deltas | Preserve producer-to-consumer composition; general 1.7 native timing/capacity data is missing. |
-| Synchronization and scheduling | Async lifetime, once-vs-ordered race, pipeline arrival/release pairs, grouped/ragged scheduling | Reuse reasoning and verify participants. Cluster/DSM/multicast limits need target evidence. |
+| MMA shape, dtype and fragment ownership | Official tc01/tc02 shapes and fragment diagrams, software-expanded tc01.ex forms, FP16-output native compile probe, historical maps | [TIX](../skills/ppu-kernel-knowledge/references/tix-porting.md) guides selection. Keep virtual ISA, native lowering and device correctness separate. |
+| Global/shared movement and layouts | Official cache modifiers, cp.async, generation-specific AIU padding/byte offsets, historical converter/TMA seams | Preserve producer-to-consumer composition and tail writes. General 1.7 native timing/capacity data is missing. |
+| Synchronization and scheduling | Documented async groups and awbar lifecycle plus historical pipeline/race lessons | Participants and completion are documented; awbar alignment has an explicit 8/64-byte discrepancy. Cluster/DSM/multicast limits need target evidence. |
 | CuTe/CUTLASS interfaces | actlize builder/collective dispatch, umbrella includes, scale cadence and extension predicates | [CUTLASS/actlize](../skills/ppu-kernel-knowledge/references/cutlass-porting.md) records the changes; version labels alone are insufficient. |
-| Numerical behavior and debugging | CuTe physical ownership, stage freshness, C-to-A bridge, native argument binding, state/scale contracts | [Numerical debugging](../skills/ppu-kernel-knowledge/references/numerics.md) is retained. A general per-generation floating-point behavior table is missing. |
-| Operator algorithms | GDN recurrence/WY/residual, exact and quantized attention, GEMM/GEMV/MoE | Read the relevant operator reference; retain NVIDIA algorithm/layout methods where applicable. |
-| Counters and call timelines | ACU raw/rule import, metric definitions, existing Asys readers | [PPU profiling](../skills/ppu-profiling/SKILL.md) replaces tool-specific interfaces. Fresh Asys capture/export was not exercised in this documentation task. |
-| Other language/runtime backends | CUDA/C++ and CuTe template evidence | PPU CuTe DSL/Triton compatibility and the upstream Hugging Face builder path were not established by these sources. |
+| Numerical behavior and debugging | TIX scalar rounding/FTZ/FMA and reciprocal/exponential bounds; CuTe ownership, stage freshness, bridge and ABI failures | [Numerical debugging](../skills/ppu-kernel-knowledge/references/numerics.md) combines those sources. MMA internal reduction and model approximations still need task-specific evidence. |
+| Operator algorithms | GDN/WY/residual, exact/quantized attention, GEMM/GEMV/MoE; official T-Head FlashAttention and PLA | Start from an appropriate official PPU implementation; retain NVIDIA algorithm/layout/oracle methods. |
+| Counters and call timelines | ACU raw/rule imports, LLC metrics, public acu_report and official Asys MCP | [PPU profiling](../skills/ppu-profiling/SKILL.md) records tested versus documented interfaces and the cache-control conflict. No fresh device capture was performed here. |
+| Other language/runtime backends | Official triton-for-sail for ppu001/ppu0015 and cmake-hgcc; CUDA/C++ and CuTe templates | PPU Triton is documented. Select compatible releases and validate the task natively; PPU CuTe DSL and the upstream Hugging Face builder path remain unestablished. |
 
-Unresolved information to obtain for a task that depends on it:
+For ZW810, the remaining requests are concrete: resolve register capacity and
+billing, awbar alignment, ACU `none` cache behavior, per-SKU cache/performance
+quantities, and MMA/model numerical details. The
+[question table](../skills/ppu-kernel-knowledge/references/official-docs.md#remaining-questions-for-the-perf-model)
+names the conflicting sections and required evidence. Basic topology, KVD's
+role, scalar arithmetic and public Triton support no longer belong on a list
+of missing materials.
 
-- A per-SKU/model resource sheet: CU count, registers and allocation rules,
-  shared/cache capacities, clocks, sustained memory bandwidth, dtype-specific
-  tensor/ALU/SFU rates and applicable launch limits for each generation.
-  For PPU1.0, retain the known occupancy values and 72-CU historical case;
-  resolve the exact card/clock behind peak figures, cache capacities and the
-  complete allocation rules. Instruction timing and floating-point semantics
-  below also remain gaps for 1.0.
-- The supplied diagram's PPU SKU/generation and applicable perf-model version.
-  Confirm the L2/LLC sharing domains, SDK `l2CacheSize` meaning, KVD role,
-  per-direction interface rates and TSM banks. The topology comparison is now
-  included; its annotations still need a target and resolved units before use
-  in a hardware profile or performance denominator.
-- A native PPU1.7 compiler/target and execution evidence for the requested
-  atoms. In particular, UE8M0 headers do not establish a UE4M3 NVFP4 interface;
-  a 20000/SM100 example does not establish 10700 TMEM/tcgen05/CLC support.
-- Instruction latency/throughput and floating-point semantics for the target:
-  accumulation, rounding, subnormal handling and transcendental error. Existing
-  operator tests cover specific schedules, not a complete ISA specification.
-- For a DSL or advanced runtime task, a supported backend/version and a minimal
-  native execution example. CUDA syntax compatibility alone does not supply it.
+A task explicitly targeting PPU1.7 still needs its native compiler/runtime and
+execution evidence. UE8M0 headers do not establish a UE4M3 NVFP4 interface;
+a 20000/SM100 example does not establish 10700 TMEM/tcgen05/CLC support. A CuTe
+DSL or advanced-runtime task likewise needs its own supported backend and run.
 
 These are gaps in the reviewed material, not claims that the hardware lacks
 the features. Fill them only when they affect the task; do not require a full

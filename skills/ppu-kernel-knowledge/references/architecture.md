@@ -1,7 +1,7 @@
 # PPU architecture and porting
 
-Sources: [S01, S02, S03, S04, S05, S07, S08, S11, S12](sources.md). Scope: the
-inspected PPU backend/SDK revisions and the separately scoped hardware summary.
+Sources: [S01, S02, S03, S04, S05, S07, S08, S11, S12, S13, S14](sources.md). Scope: the
+inspected PPU backend/SDK revisions, official manuals and scoped hardware summary.
 Hardware capabilities and resource limits must be revalidated for a different
 target.
 
@@ -9,8 +9,8 @@ target.
 
 | Target | Historical programming path | Decision-changing boundary |
 |---|---|---|
-| PPU1.0 / ACOMPUTE10000 / PPU0010 | Native register MMA; AIU and paired SWZL loads; plain async-copy paths also exist | Fragment maps and target selection differ from NVIDIA SM80 despite frontend compatibility. |
-| PPU1.5 / ACOMPUTE10500 | Target-specific AIU/atom traits; explicit low-bit work exists | Do not carry 10000 coordinates, fragment layouts or native admission over by name. |
+| PPU1.0 / ACOMPUTE10000 / PPU0010; public ISA name `ppu001` | ZW810/610 and E variants; tc01 register MMA, AIU/SWZL and plain async copy | Fragment maps and target selection differ from NVIDIA SM80 despite frontend compatibility. |
+| PPU1.5 / ACOMPUTE10500 / `ppu0015` | M890; tc02, a different AIU interface, FP8 and MXFP4 | The public ISA excludes original tc01/AIU forms. Do not carry 10000 coordinates or layouts over by name. |
 | PPU1.7 / ACOMPUTE10700 | Hopper-style CuTe/CUTLASS TMA/WGMMA structure for FP16/BF16; PPU-specific extensions | Source compatibility does not establish native target support, feature parity or performance. |
 
 Read the actual target manifest and compiler output. An old llama.cpp wrapper
@@ -25,16 +25,20 @@ compiler architecture macros or use an empty guarded body as success.
 
 ## Match the memory and execution domains
 
-The supplied [PPU/Hopper comparison](memory-hierarchy.md) describes a 512 KB
-L2 shared by four CUs, then Fabric and a partitioned LLC. In that topology,
-the LLC is the closest functional counterpart of NVIDIA's chip-wide L2;
-KVD is not established as an NVIDIA L1 equivalent. TSM has a separate local
-storage path. Reuse, traffic and bandwidth models must name the actual level.
+The official HGGC guide places a complete CTA on one CU, with 32-thread warps.
+L1 is per CU, L2 is shared within a CE, and LLC is shared across CEs. Asight
+identifies KVD as vector data cache and KSD as scalar data cache. These facts
+supersede the earlier diagram-only uncertainty; see [memory hierarchy](memory-hierarchy.md).
 
-The summary does not identify a SKU/generation. Its cache capacities, HBM3
-configuration and interface rates are not ZW810 or PPU1.7 constants. It also
-does not establish CTA residency domains, WS/WE counts, TSM banks or cluster
-semantics. Preserve the independent instruction/resource evidence below.
+TSM is separate from global-cache traffic. The documented ordinary shared
+access model has 32 banks of four bytes, plus a separate group-contention
+dimension: ppu001 has two groups with 128-byte address spans and 128 B/cycle
+per group; ppu0015 has four groups with 1024-byte spans. A 256-byte stride
+can repeatedly select one ppu001 group even when bank-level reasoning looks
+acceptable. Use the actual AIU/SWZL layout for matrix loads.
+
+The supplied 512 KB L2 / 64 MB LLC / 288 GB diagram still has no confirmed SKU.
+Its quantities do not follow from the public topology or establish ZW810 peaks.
 
 ## CUDA/PTX compatibility: preserve and check
 
@@ -50,6 +54,11 @@ does not make every MMA shape, register order or copy descriptor identical.
 | Plain `ldmatrix.x4` | The tested Marlin A address map needs output order `(v0,v2,v1,v3)` | Validate the address map and register order together. This permutation is not a rule for SWZL loads. |
 | `ldmatrix.x2` | NVIDIA address formulas for the tested narrow tiles did not match PPU | Start from the backend traits or a verified element-wise copy, then probe the intended fast read. |
 | `m8n16k16` | Historical ppu0015 assembler and compiler instruction selection disagreed | Check the full compilation path. Assembly-only acceptance cannot admit the kernel. |
+
+The public [TIX guide](tix-porting.md) adds a documented alternative:
+`tc01.ex.mma` supports additional n8 shapes through software conversion, with
+ppu0015-style fragments. Compare its lowering with a rederived n16 implementation;
+do not infer equal throughput from an accepted instruction name.
 
 The recorded PPU0010 n16 accumulator map is
 `row = lane/4 + 8*(r/4)`, `col = lane%4 + 4*(r%4)` for `r=0..7`.
@@ -107,14 +116,15 @@ speedup. Low-bit scale encodings must match the actual atom; see
 
 ## Resources and evidence
 
-The historical PPU0010 occupancy calculator and kernel reports provide:
+The public manuals and historical PPU0010 reports provide different evidence:
 
 | Resource | Recorded value / scope |
 |---|---|
-| Warp | 32 threads; up to 64 warps/CU |
-| Shared memory | 256 KiB/CU; recorded allocation unit 128 bytes |
-| Registers | 131072 32-bit registers/CU; recorded maximum 256/thread |
+| Warp / launch limits | Official ppu001/ppu0015 tables: 32 threads/warp, 2048 threads/CU, 1024 threads/block |
+| Shared memory | Official tables: 256 KB/CU and 32 banks; historical allocation unit 128 bytes |
+| Registers | Unresolved: HGGC/TIX list 64K VREG/CU; the official 810E optimization guide lists 128K; history records 131072 32-bit registers/CU. The manuals label a 255 VREG/warp limit, while history used 256/thread billing. Resolve units and allocation rules rather than combine these numbers. |
 | Register billing | A mixed-GEMM report with 186 registers/thread hit a limit consistent with 256 billed; a small fixed rounding model failed that case |
+| Product examples | Official optimization guide: 810E, 64 CUs. M890 guide: OAM 39 CUs/10 CEs; M530 PCIe 30 CUs/8 CEs; four-CU CE organization. Query the task's product instead of using a nominal CE product as its available CU count. |
 
 Use compiler resource output and the selected ACU occupancy limits rather than
 extrapolate a universal allocation rule from one observation. Calculate both
@@ -133,7 +143,9 @@ These are not PPU1.5/1.7 constants. CU count, cache capacity, memory bandwidth,
 clocks and dtype-specific peaks must identify the SKU/model and operating
 configuration. Historical bandwidth/peak numbers from different boxes are
 not a single PPU spec. PPU1.0 still needs a complete card-specific resource
-profile, allocation rules, instruction timing and floating-point semantics.
+profile, resolved allocation rules and instruction timing. Scalar floating-point
+rules are now documented in [numerics](numerics.md#preserve-the-documented-arithmetic);
+MMA internal rounding and performance-model fidelity remain task-specific questions.
 The [coverage map](../../../docs/ppu-adaptation.md#knowledge-coverage-and-gaps)
 records these gaps for all three generations.
 

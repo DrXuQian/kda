@@ -2,7 +2,7 @@
 
 # Numerical debugging at the physical seam
 
-Sources: [S01, S06, S08, S11](sources.md). Adapted from Quactlize's numeric-debug
+Sources: [S01, S06, S08, S11, S13](sources.md). Adapted from Quactlize's numeric-debug
 guidance, with attention/ABI counterexamples. The original Quactlize material
 retains Apache-2.0; see [notices](../../../THIRD_PARTY_NOTICES.md).
 
@@ -18,6 +18,22 @@ tags, different heads, nonzero state or shifted absolute stage coordinates.
 An N-only tag cannot establish K-stage freshness. Exactly representable,
 order-independent subtests isolate layout from arithmetic when applicable;
 the full task still needs its declared independent numerical reference.
+
+## Preserve the documented arithmetic
+
+The official TIX scalar contract defines `.rtte` (nearest, ties to even),
+`.rtz`, `.rtn` and `.rtp`. FP32 normally preserves subnormal inputs/results;
+`.ftz` makes them signed zero. Scalar FMA performs one final rounding.
+The documented approximate FP32 reciprocal and base-2 exponential bounds are
+1 and 2 ULP, respectively. These scalar guarantees do not specify the internal
+reduction order of MMA or admit a different attention/recurrence schedule.
+
+HGCC fast-math combines FTZ, relaxed divide/sqrt and FMA contraction. Record
+those flags with the candidate and oracle; separate mathematical approximation
+from fragment/transport failure. Use the instruction's special-value rules
+and the math API's function-specific bounds instead of copying NVIDIA error
+assumptions. See [official documentation](official-docs.md) and
+[TIX bindings and completion](tix-porting.md#completion-and-assembly-bindings).
 
 ## Trace physical ownership
 

@@ -1,8 +1,19 @@
 # Linear attention and Gated DeltaNet
 
-Sources: [S01, S04, S08](sources.md). The PPU1.0 residual implementation below
+Sources: [S01, S04, S08, S15](sources.md). The PPU1.0 residual implementation below
 is a historical case study. Use the official algorithm reference and the
 task's own PPU code; no external operator fork is required to read this guide.
+
+## Official PPU starting point
+
+[T-Head PLA v1.0.0](https://github.com/t-head/pla/tree/700ae21741aa13cc7af2edf503262867d418bfab)
+provides ppu001/ppu0015 GDN and Kimi Delta Attention decode, MTP and prefill.
+Its prefill depends on official actlize v1.0.0. Inspect the selected namespace,
+k-last/v-last state layout, packed inputs and target tuning before adapting
+it; the historical C64 case below does not define every PLA API.
+`PPU_SDK_DIR` and `PPU_ACTLIZE_DIR` select its SDK/dependency locations.
+Use its validation entry plus an independent recurrence check. The algorithm
+abbreviation KDA in PLA is distinct from this Kernel Design Agents framework.
 
 ## Freeze the recurrence and state contract
 
