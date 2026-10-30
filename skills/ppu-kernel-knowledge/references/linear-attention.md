@@ -1,8 +1,8 @@
 # Linear attention and Gated DeltaNet
 
-Sources: [S01, S04, S08](sources.md). Primary retained PPU1.0 source:
-actlizeLA `40776d7`. The early scalar chunk prototype is historical, not the
-current implementation.
+Sources: [S01, S04, S08](sources.md). The PPU1.0 residual implementation below
+is a historical case study. Use the official algorithm reference and the
+task's own PPU code; no external operator fork is required to read this guide.
 
 ## Freeze the recurrence and state contract
 
@@ -27,7 +27,7 @@ cases distinguish update order and missing gate factors.
 
 ## Compare complete numerical schedules
 
-actlizeLA keeps original, materialized-WY and residual schedules distinct.
+Keep original, materialized-WY and residual schedules distinct.
 The retained residual path has BF16 operands/output and FP32 carried state;
 its C64 full-chunk specialization and guarded tail preserve the admitted
 arithmetic. An original reset approximation or a different state dtype cannot
@@ -36,6 +36,14 @@ silently become the oracle for that path.
 Delivery-only changes use equality to the admitted schedule plus an independent
 numerical check. Approximate recurrence changes need their own accuracy
 contract and representative activations.
+
+The historical retained case used Q/K `[B,T,Hk,128]`, V/output
+`[B,T,Hv,128]`, and FP32 state `[B,Hv,128,128]`, with `Hv` a multiple of `Hk`.
+Gate/beta were `[B,T,Hv]`, with gates in natural-log units. Q/K/V/output and
+beta were BF16; gates were BF16 or FP32. C64 was an internal chunk size, and incomplete chunks used a guarded
+tail. Validation covered output and final state, nonzero initial state,
+grouped-value heads, tails and input immutability. This defines the evidence
+scope of that example, not a fixed shape or tolerance for every GDN task.
 
 ## Preserve the execution graph before tuning
 
@@ -50,6 +58,14 @@ and split preparation established different implementations. The early
 "in-kernel intermediates make tensor-core GDN impossible" conclusion is obsolete.
 Global operands can use AIU; register-produced state/residual operands need
 their own shared/fragment producer contract.
+
+| Operand or phase | Producer and consumer to preserve |
+|---|---|
+| Gate prefix | Scalar reads and scan/carry; it is not a matrix load. |
+| KKT and global chunk operands | Matched AIU.swzl producer, ld.swzl consumer and BF16 MMA, including tail padding. |
+| Inverse solve | CTA-produced FP32 data with the selected TF32 high/residual arithmetic and diagonal dependencies; changing delivery must retain that precision schedule. |
+| FP32 state snapshot | Register-to-BF16 shared stores followed by the declared transposed read; the layout may also serve global state publication. |
+| Residual / scaled V / probability intermediates | Register-produced shared data; a global AIU instruction cannot replace those stores without a new producer path. |
 
 The split-prepare experiment is a useful controlled counterexample to
 "fewer launches or bytes must win": it reduced W/U publication amplification

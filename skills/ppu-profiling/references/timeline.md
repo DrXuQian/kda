@@ -35,8 +35,8 @@ duration or start/end units from the exporter/schema. One recorded schema uses
 `HGPTI_ACTIVITY_KIND_KERNEL`; do not hardcode NVIDIA `CUPTI_*` tables or assume
 all Asys versions use the same column names.
 
-The Quactlize reader records the chosen table/name/time columns explicitly.
-Its historical empty-kernel guard matters: timestamp-calibration failure left
+Record the chosen table/name/time columns explicitly. In a historical capture,
+timestamp-calibration failure left
 thousands of host API rows but no device kernels. Report size and successful
 export were not evidence of device timing. An empty device table remains a
 failed capture for this question, not a reason to choose another populated table.

@@ -65,8 +65,11 @@ the questioned seam against an independent logical map or device probe.
 ## PPU1.7 seams
 
 Preserve the Hopper algorithm and collective while adapting build/dispatch,
-descriptors, pipeline API, runtime and scheduler seams. In the inspected FA
-fork, `USE_PPU` means legacy AIU; `FLASHATTN_PPU17` selects the Hopper path.
+descriptors, pipeline API, runtime and scheduler seams. A historical FA
+integration used `USE_PPU` for legacy AIU and a separate `FLASHATTN_PPU17`
+guard for the Hopper path. These are integration-specific names, not switches
+provided by the official FlashAttention project. Keep equivalent target
+separation explicit in the task's own port.
 The 3.6 and 4.3 backends require different epilogue/pipeline APIs. Keep the
 empty-barrier arrival count and release predicate matched.
 

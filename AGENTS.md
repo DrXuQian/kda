@@ -17,9 +17,12 @@ semantics or grant device access.
 
 Knowledge is distilled from multiple operator repositories, local memory and
 skills. Source anchors are in `skills/ppu-kernel-knowledge/references/sources.md`.
-Keep required guidance in tracked files with relative links. Use fixed external
-links for optional provenance; label unavailable originals. Do not require
-another machine to have the author's private memory or globally installed skills.
+Keep required PPU guidance in tracked Markdown with relative links. Use official
+public repositories for dependencies and algorithm baselines, not personal forks.
+Bring needed historical documentation into the relevant local reference instead
+of linking an author's operator repositories. Do not require another machine
+to have private memory or globally installed skills. Distinguish task-owned
+extensions from capabilities verified in the official dependency revision.
 Update the relevant synthesis and provenance together. Resolve later corrections
 before promoting a remembered observation into guidance. Never transfer a
 PPU1.0 layout, NVIDIA timing, or simulator result to another target silently.

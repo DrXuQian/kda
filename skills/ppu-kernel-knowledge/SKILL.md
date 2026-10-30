@@ -27,10 +27,11 @@ For optimization or NVIDIA-to-PPU migration on a physical ZW810, use the
 | Wrong values, fragment ownership, races, sub-byte pitches | [Numerical debugging](references/numerics.md) |
 
 For text search, run `rg -n -i 'topic' references` from this skill's directory.
-[Sources](references/sources.md) links the included guidance to fixed external
-sources and identifies unavailable historical originals. The references here
-contain the reusable findings; no private memory or globally installed skill
-is required. Their historical evidence is not a new hardware-validation campaign.
+[Sources](references/sources.md) maps the included PPU documentation and official
+public upstreams. Use official dependencies and keep necessary extensions in
+the task workspace. The references contain the reusable findings; no personal
+fork, private memory or globally installed skill is a reading prerequisite.
+Historical evidence is not a new hardware-validation campaign.
 
 ## Apply a lesson
 

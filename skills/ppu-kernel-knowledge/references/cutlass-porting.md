@@ -4,12 +4,33 @@ Sources: [S01, S03, S05, S08, S11](sources.md). actlize retains CUTLASS/CuTe's
 layered design but changes architecture atoms, builders and operand delivery.
 Keep the reusable structure and inspect the actual instantiated backend.
 
+## Official actlize baseline
+
+Use the official T-Head actlize source listed in [S11](sources.md). The inspected
+`v1.0.0` branch revision is `cace89de8cb1cfc9345535bdbc1fb5f403bfb01f`.
+Its PPU0010 CMake selector is `CUTLASS_PPU_ARCHS=ppu0010`; the native toolchain
+uses `hgcc -x hg -arch=ppu_10 -DSWITCH_TO_HGGCRT`. The kernel examples, builder
+and atom traits are the starting point for a new ZW810 task.
+
+The following limits were checked in that official source. They explain which
+historical fixes require task-owned implementation rather than a fork dependency:
+
+| Seam | Official source at this revision | Required action when the task uses it |
+|---|---|---|
+| FP16-output MMA | `PPU0010_16x16x16_F16F16F16F16_TN::fma` in `cute/arch/mma_ppu0010.hpp` has an `assert(0)` device body | The historical one-MMA C-to-A bridge needs an implemented atom. Add and validate it locally, or use a verified layout-conversion path that preserves rounding. A declared type is not an implemented instruction. |
+| Mixed-input group scales | The builder lists PerCol, Gs64 and Gs128 AIU policies. The collective computes `GroupK = copy_steps / Scale_TileK` before a modulo | A gs=32 extension must resolve each scale group and exclude zero `GroupK`; historical per-MMA-atom scale reload is not supplied by that code. |
+| Interleaved expert planes | The `kContinous != 1` branch of `load_init_B` uses a zero L stride | Do not infer multi-expert interleaved support from a single-GEMM example. Implement the proper byte pitch and test distinct experts. |
+
+These are scoped source observations, not new device measurements or hardware
+limitations. Preserve the official dependency and keep necessary extension
+patches with the task. Do not select a personal fork as an implicit repair.
+
 ## Choose the tree before choosing an atom
 
 | Source family | Relevant entry points | What transfers |
 |---|---|---|
 | NVIDIA CUTLASS | CuTe atoms/layouts, collective builder, `GemmUniversal`, epilogue and scheduler | Layout algebra, composition and algorithm structure; architecture-specific traits need comparison. |
-| Public actlize, PPU0010/0015 | `include/ppu_include.hpp`, `cute/{arch,atom}/*ppu0010*`, `cutlass/gemm/collective/builders/ppu_mma_builder.inl` | Similar APIs select PPU register MMA and AIU collectives. Start from the matching example and follow its concrete types. |
+| Official actlize, PPU0010/0015 | `include/ppu_include.hpp`, `cute/{arch,atom}/*ppu0010*`, `cutlass/gemm/collective/builders/ppu_mma_builder.inl` | Similar APIs select PPU register MMA and AIU collectives. Start from the matching example and follow its concrete types. |
 | PPU CUTLASS 3.6/4.x with 10700 support | `include/ppu/ppu_include_10700.hpp`, `ppu/cute/{arch,atom}`, SM90 builders/pipelines | BF16/FP16 retain Hopper TMA/WGMMA structure; private low-bit atoms and descriptor/runtime seams need separate checks. |
 
 These trees are not interchangeable because their directory or version labels
@@ -20,7 +41,7 @@ revision, real compiler target and generated specialization.
 
 ## Same schedule name can select different hardware
 
-In actlize S11, `KernelTmaWarpSpecialized*MixedInput` and selected
+In official actlize S11, `KernelTmaWarpSpecialized*MixedInput` and selected
 `KernelAiuMultistageMixedInput*` tags enter the same PPU builder and
 `ppu_mma_aiu_multistage_mixed_input.hpp` collective. A `Tma` tag does not prove
 Hopper TMA execution. `examples/16_ppu_mixed_dtype_gemm` exercises this route.
@@ -64,7 +85,7 @@ with a converter. See [numerical debugging](numerics.md).
 
 ## Extend a collective without changing unrelated dispatch
 
-Quactlize's additive extension exposed a reusable template hazard: overlapping
+An additive mixed-input extension exposed a reusable template hazard: overlapping
 `CollectiveBuilder` predicates can be ambiguous, while a wrapper tag that
 collapses to a vendor tag can silently select the vendor collective. Give a
 new dispatch policy its own identity and make specialization predicates

@@ -11,14 +11,13 @@ Verbatim copies of the upstream license files referenced below are provided in
 ## PPU knowledge and profiling guidance
 
 The PPU references synthesize the owner's operator history, memory and skills.
-Their source revisions, included summaries and original-source availability
-are recorded in
+Their included references, evidence scope and official upstreams are recorded in
 [`skills/ppu-kernel-knowledge/references/sources.md`](skills/ppu-kernel-knowledge/references/sources.md).
-Source links do not distribute SDK implementations,
+The references do not distribute SDK implementations,
 raw conversations, benchmark reports or compiled artifacts.
 
 The PPU profiling skill and its ACU references, and the PPU numerical-debug reference,
-adapt guidance from [Quactlize](https://github.com/DrXuQian/quactlize), under
+adapt guidance from Quactlize, under
 Apache-2.0. Those files carry SPDX notices and retain Apache-2.0 rather than
 the first-party documentation license. The original license text is in
 [`third_party_licenses/Apache-2.0-Quactlize.txt`](third_party_licenses/Apache-2.0-Quactlize.txt).

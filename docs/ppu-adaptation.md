@@ -66,8 +66,10 @@ larger collection's query tooling for a small local knowledge base.
 The knowledge pages distill operator history rather than export raw memory.
 Required guidance is tracked in this checkout and can be read on another
 machine without the author's memory or global skills. The
-[source index](../skills/ppu-kernel-knowledge/references/sources.md) links each
-origin to its included summary and marks external or unavailable originals.
+[source index](../skills/ppu-kernel-knowledge/references/sources.md) maps the
+included documentation and official public upstreams. Personal operator forks
+are not documentation or dependency requirements. Historical extensions are
+distinguished from the inspected official implementation.
 Each page identifies its source and limits. In particular, corrected layout
 claims, retired Sage INT8-PV experiments and old GDN delivery blockers are not
 current hardware rules. PPU1.0, 1.5 and 1.7 remain distinct targets.

@@ -54,7 +54,7 @@ workspace. The PPU skills are ordinary Markdown; an agent with shell/file tools
 can read them directly. Their selected knowledge and references are committed
 here and can be read offline on another machine. The original author's memory
 and global skills are not required; [sources](skills/ppu-kernel-knowledge/references/sources.md)
-distinguishes included guidance from optional external evidence.
+maps the included PPU documentation and official public upstreams.
 For Claude Code discovery, link them from this checkout:
 
 ```bash
