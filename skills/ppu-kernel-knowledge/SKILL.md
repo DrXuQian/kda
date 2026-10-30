@@ -18,6 +18,7 @@ For optimization or NVIDIA-to-PPU migration on a physical ZW810, use the
 | Task or symptom | Read |
 |---|---|
 | PPU target, MMA/copy semantics, native lowering, Hopper port | [Architecture](references/architecture.md) |
+| CU/SM comparison, KVD/TSM, L2/LLC reuse, bandwidth scope | [Memory hierarchy](references/memory-hierarchy.md) |
 | NVIDIA CUTLASS to actlize, builder dispatch, CuTe copy/fragment contracts | [CUTLASS and actlize](references/cutlass-porting.md) |
 | Gated DeltaNet, chunking, recurrent state, WY/residual | [Linear attention](references/linear-attention.md) |
 | Exact attention, online softmax, masks, GQA, FA2/FA3 | [FlashAttention](references/flash-attention.md) |

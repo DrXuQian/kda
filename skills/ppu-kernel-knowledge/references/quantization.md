@@ -1,8 +1,9 @@
 # Quantization, offline formats and GEMV
 
-Sources: [S01, S08](sources.md). Scope is the recorded Quactlize/PPU0010
-format and reader work. Read the current producer, descriptor and selected
-kernel before applying a historical configuration.
+Sources: [S01, S08, S12](sources.md). Scope is the recorded Quactlize/PPU0010
+format and reader work, with a separately scoped cache-topology reference.
+Read the current producer, descriptor and selected kernel before applying a
+historical configuration.
 
 ## Treat the format as an interface
 
@@ -47,12 +48,16 @@ policy and complete-call scope. Compare the current incumbent and relevant
 raw-GGUF/K-pack or alternate reader on the same device and inputs. Include
 Split-K reduction in full-call timing and retain a strong unsplit control.
 
-Use the measured cache capacity and a documented eviction/rotation protocol.
-The historical harness used a ring at least 2.25 times verified L2 and complete
-traversals; that is a harness setting, not a PPU architectural constant. Keep
-event timing distinct from ACU forced-cold replay and model Asys timing.
-Alternate arms, retain raw distributions and classify missing/invalid rows
-separately from regressions.
+Name the cache level being made cold and use its verified capacity with a
+documented eviction/rotation protocol. The historical harness used a ring at
+least 2.25 times the capacity it called L2, with complete traversals; that
+setting does not establish the cache topology on another target. The supplied
+[hardware comparison](memory-hierarchy.md) distinguishes near-CU L2 from LLC.
+If that topology applies, exceeding only the nearby L2 cannot establish
+HBM-cold weights. Check the selected SDK's capacity meaning and available
+miss/downstream-traffic evidence. Keep event timing distinct from ACU
+forced-cold replay and model Asys timing. Alternate arms, retain raw
+distributions and classify missing/invalid rows separately from regressions.
 
 ## Derive a candidate before measuring it
 
@@ -63,7 +68,8 @@ A and metadata as well as B. Check emitted native loads against source intent.
 GEMV can be limited by dequantization, metadata or instruction issue even when
 its effective weight bandwidth looks low. Historical equal latencies across
 different stored bitwidths motivated this diagnosis; they do not prove every
-GEMV is ALU-bound. Check DRAM, L1/L2, issue/stall and occupancy evidence.
+GEMV is ALU-bound. Check DRAM, the actual cache/interface counters, issue/stall
+and occupancy evidence.
 AIU/shared staging can save requests while adding barriers or address work.
 Use the full measured call to select a winner.
 

@@ -2,7 +2,7 @@
 
 # Diagnose the PPU kernel
 
-Sources: [S01, S04, S06, S08](../../ppu-kernel-knowledge/references/sources.md).
+Sources: [S01, S04, S06, S08, S12](../../ppu-kernel-knowledge/references/sources.md).
 Use actual metric names and definitions from the captured ACU version.
 
 | Dimension | Check | Avoid concluding from one number |
@@ -10,9 +10,16 @@ Use actual metric names and definitions from the captured ACU version.
 | Work and duration | Exact selected body, useful/issued work, launches, instrumented duration | A kernel-name match alone does not establish equal workload. |
 | Residency and work supply | Grid/active warps, registers, shared storage, spills, CTA limits | Lower registers do not help a grid-limited workload automatically. |
 | Arithmetic and delivery | Dynamic MMA/load/conversion/address work, native operand forms | Fewer static instructions do not establish a shorter critical dependency chain. |
-| Memory hierarchy | Useful bytes, KVD/L1/L2/DRAM traffic, vector widths, reuse | Interface transactions are not the same as HBM bytes. |
+| Memory hierarchy | Useful bytes, KVD/L2 traffic, available LLC and DRAM counters, vector widths, reuse | Match actual target definitions; interface transactions are not HBM bytes and KVD is not an assumed L1. |
 | Synchronization | Barrier counts, absolute waits, async completion and stage reuse | An unchanged barrier count can have a different waiting cost. |
 | Publication and tails | Output stores, shared bank conflicts, inactive lanes/tiles | A padded/masked tensor instruction still consumes issued work. |
+
+For a reuse or store-pressure hypothesis, first resolve the
+[memory hierarchy](../../ppu-kernel-knowledge/references/memory-hierarchy.md)
+on the selected target. The supplied diagram's narrower CU write interface
+motivates checking materialization cost, not a universal fusion rule. Measure
+all affected stages and residency. Distinguish near-CU reuse from LLC reuse;
+a scheduler change alone does not establish where its CTAs ran.
 
 ## PPU counterexamples worth retaining
 

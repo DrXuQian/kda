@@ -27,6 +27,16 @@ tool/metric definitions before converting values. Missing is not zero. The
 `cu`, `pu`, `kvd`, `tsm` and `aiu` families are not a textual replacement of
 NCU's SM/L1TEX families.
 
+The supplied [hardware comparison](../../ppu-kernel-knowledge/references/memory-hierarchy.md)
+([S12](../../ppu-kernel-knowledge/references/sources.md)) distinguishes a
+four-CU shared L2 from a wider LLC, but does not identify its PPU model.
+Bind the topology and each counter to the actual target: endpoint, direction,
+per-unit versus aggregate scope, bytes/transactions and clock domain. KVD-to-L2
+bytes are not automatically HBM bytes. Do not derive LLC hits by subtracting
+unmatched counters or substitute a combined read/write peak for a read peak.
+No LLC metric name or SDK `l2CacheSize` sharing scope is established by that
+diagram; inspect the selected SDK/model definition before using either.
+
 Installed definitions are under `asight/sections`, including `SpeedOfLight`,
 `Occupancy`, `InstructionStatistics`, `MemoryWorkloadAnalysis` and
 `WarpStateStatistics`. Query only the needed metrics. `--query-metrics` is a

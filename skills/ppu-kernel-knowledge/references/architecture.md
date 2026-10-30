@@ -1,8 +1,9 @@
 # PPU architecture and porting
 
-Sources: [S01, S02, S03, S04, S05, S07, S08, S11](sources.md). Scope: the inspected
-PPU backend/SDK revisions. Hardware capabilities and resource limits must be
-revalidated for a different target.
+Sources: [S01, S02, S03, S04, S05, S07, S08, S11, S12](sources.md). Scope: the
+inspected PPU backend/SDK revisions and the separately scoped hardware summary.
+Hardware capabilities and resource limits must be revalidated for a different
+target.
 
 ## Select the actual backend
 
@@ -21,6 +22,19 @@ architecture flags. Inspect the emitted device body and backend resources.
 SDK2.1.1 in the recorded 1.7 work exposed 1.0/1.5 targets. Accepting SM90 syntax
 or `ACOMPUTE_VERSION=10700` did not make its output native 1.7. Do not fabricate
 compiler architecture macros or use an empty guarded body as success.
+
+## Match the memory and execution domains
+
+The supplied [PPU/Hopper comparison](memory-hierarchy.md) describes a 512 KB
+L2 shared by four CUs, then Fabric and a partitioned LLC. In that topology,
+the LLC is the closest functional counterpart of NVIDIA's chip-wide L2;
+KVD is not established as an NVIDIA L1 equivalent. TSM has a separate local
+storage path. Reuse, traffic and bandwidth models must name the actual level.
+
+The summary does not identify a SKU/generation. Its cache capacities, HBM3
+configuration and interface rates are not ZW810 or PPU1.7 constants. It also
+does not establish CTA residency domains, WS/WE counts, TSM banks or cluster
+semantics. Preserve the independent instruction/resource evidence below.
 
 ## CUDA/PTX compatibility: preserve and check
 

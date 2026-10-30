@@ -89,9 +89,10 @@ the current knowledge. Its resource coverage is still partial: known occupancy
 limits and historical card measurements do not constitute a complete hardware
 profile. The gap review below includes PPU1.0 as well as PPU1.5/1.7.
 
-| Information needed | Evidence found in memory/skills | KDA use / remaining gap |
+| Information needed | Evidence in the included material | KDA use / remaining gap |
 |---|---|---|
 | Device resources and performance model | PPU0010 occupancy limits, historical card values and ACU resource counterexamples | [Architecture](../skills/ppu-kernel-knowledge/references/architecture.md) records their scope. The SKU-specific profile remains partial for 1.0; complete profiles are missing for 1.5/1.7. |
+| Cache topology and interface bandwidth | Supplied PPU/Hopper summary: four-CU shared L2, Fabric, partitioned LLC, separate TSM path and scoped interface annotations | [Memory hierarchy](../skills/ppu-kernel-knowledge/references/memory-hierarchy.md) includes the usable comparison. Its SKU/generation, cache policies, clock domains and several unit/aggregation details remain unresolved; its numbers do not complete the ZW810 profile. |
 | Compiler target and native instruction path | Old wrapper-target failure; native 1.0/1.5 builds; 1.7 source/model work | Keep build contracts separate. The reviewed SDK cannot establish native 1.7 compilation. |
 | MMA shape, dtype and fragment ownership | FP16/INT8 n16 maps, plain/SWZL load differences, 10700 FP8/FP4 interfaces | Use target traits and device/native probes. Do not assume SM80 or SM90 register order. |
 | Global/shared movement and layouts | Plain cp.async, AIU/SWZL pairing, converter reorder, TMA descriptor deltas | Preserve producer-to-consumer composition; general 1.7 native timing/capacity data is missing. |
@@ -111,6 +112,11 @@ Unresolved information to obtain for a task that depends on it:
   resolve the exact card/clock behind peak figures, cache capacities and the
   complete allocation rules. Instruction timing and floating-point semantics
   below also remain gaps for 1.0.
+- The supplied diagram's PPU SKU/generation and applicable perf-model version.
+  Confirm the L2/LLC sharing domains, SDK `l2CacheSize` meaning, KVD role,
+  per-direction interface rates and TSM banks. The topology comparison is now
+  included; its annotations still need a target and resolved units before use
+  in a hardware profile or performance denominator.
 - A native PPU1.7 compiler/target and execution evidence for the requested
   atoms. In particular, UE8M0 headers do not establish a UE4M3 NVFP4 interface;
   a 20000/SM100 example does not establish 10700 TMEM/tcgen05/CLC support.

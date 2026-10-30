@@ -25,6 +25,7 @@ new device validation. Build and validate the requested kernel on its target.
 | S09 | [KDA flow](../../../docs/agent-flow.md), [adaptation map](../../../docs/ppu-adaptation.md) | The upstream workflow and pinned NVIDIA knowledge/profiling collections; their sources and licenses are listed in the repository README and notices. |
 | S10 | [ACU collection](../../ppu-profiling/references/collection.md), [metrics/rules](../../ppu-profiling/references/metrics.md), [Asys timeline](../../ppu-profiling/references/timeline.md) | SDK2.1.1 command and schema observations. ACU imports were exercised; Asys help/version was checked without a new device capture. |
 | S11 | [Official actlize baseline and extension boundaries](cutlass-porting.md#official-actlize-baseline), [PPU traits](architecture.md) | Official source review at the revision below. Local extensions and historical fixes are distinguished from the official implementation. |
+| S12 | [PPU memory hierarchy and Hopper comparison](memory-hierarchy.md), [ACU interpretation](../../ppu-profiling/references/metrics.md) | Adapted from the user-supplied `PPU架构与NVIDIA_SM对照.md`. Includes diagram-derived topology, interface annotations and unresolved units. The PPU model/generation is unspecified; this is not a ZW810 specification or a device measurement. NVIDIA comparisons use the official documentation linked in the local reference. |
 
 ## Official upstreams
 
