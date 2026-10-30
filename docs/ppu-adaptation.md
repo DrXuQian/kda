@@ -76,9 +76,15 @@ formats, alongside algorithms and optimization techniques. The NCU companion
 adds a B200/H100 resource table, memory/compute peaks and diagnosis dimensions.
 These define the questions to answer for PPU, not values to copy into a PPU card.
 
+PPU1.0 is a primary target of this collection. Its native MMA, AIU/SWZL,
+actlize, CuTe debugging and attention/GEMM/GEMV/MoE evidence supply much of
+the current knowledge. Its resource coverage is still partial: known occupancy
+limits and historical card measurements do not constitute a complete hardware
+profile. The gap review below includes PPU1.0 as well as PPU1.5/1.7.
+
 | Information needed | Evidence found in memory/skills | KDA use / remaining gap |
 |---|---|---|
-| Device resources and performance model | PPU0010 occupancy limits and ACU resource counterexamples | [Architecture](../skills/ppu-kernel-knowledge/references/architecture.md) has the scoped values. Complete SKU-specific 1.5/1.7 profiles are missing. |
+| Device resources and performance model | PPU0010 occupancy limits, historical card values and ACU resource counterexamples | [Architecture](../skills/ppu-kernel-knowledge/references/architecture.md) records their scope. The SKU-specific profile remains partial for 1.0; complete profiles are missing for 1.5/1.7. |
 | Compiler target and native instruction path | Old wrapper-target failure; native 1.0/1.5 builds; 1.7 source/model work | Keep build contracts separate. The reviewed SDK cannot establish native 1.7 compilation. |
 | MMA shape, dtype and fragment ownership | FP16/INT8 n16 maps, plain/SWZL load differences, 10700 FP8/FP4 interfaces | Use target traits and device/native probes. Do not assume SM80 or SM90 register order. |
 | Global/shared movement and layouts | Plain cp.async, AIU/SWZL pairing, converter reorder, TMA descriptor deltas | Preserve producer-to-consumer composition; general 1.7 native timing/capacity data is missing. |
@@ -93,7 +99,11 @@ Unresolved information to obtain for a task that depends on it:
 
 - A per-SKU/model resource sheet: CU count, registers and allocation rules,
   shared/cache capacities, clocks, sustained memory bandwidth, dtype-specific
-  tensor/ALU/SFU rates and cluster limits, especially for PPU1.5/1.7.
+  tensor/ALU/SFU rates and applicable launch limits for each generation.
+  For PPU1.0, retain the known occupancy values and 72-CU historical case;
+  resolve the exact card/clock behind peak figures, cache capacities and the
+  complete allocation rules. Instruction timing and floating-point semantics
+  below also remain gaps for 1.0.
 - A native PPU1.7 compiler/target and execution evidence for the requested
   atoms. In particular, UE8M0 headers do not establish a UE4M3 NVFP4 interface;
   a 20000/SM100 example does not establish 10700 TMEM/tcgen05/CLC support.

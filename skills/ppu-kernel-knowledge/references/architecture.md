@@ -104,11 +104,21 @@ extrapolate a universal allocation rule from one observation. Calculate both
 resident CTAs and `CTAs * warps_per_CTA`, then compare with actual grid supply.
 Reducing blocks/CU can still increase resident warps when the tile changes.
 
+Other PPU0010 card values appear in [S01/S02](sources.md): the mixed-GEMM
+history used 72 CUs; the INT8 note records a user-provided 1000 TOPS peak and
+derives 500 TFLOP/s FP16, also used in historical GEMM normalization. The
+derived FP16 figure is not an independent peak measurement. The legacy skill
+cites approximately 2766 GB/s HBM but also discusses a 1792 GB/s part. Keep
+each value attached to its original card/run until SKU and clocks are resolved.
+A benchmark's 256 MB working-set sweep is not a measured cache capacity.
+
 These are not PPU1.5/1.7 constants. CU count, cache capacity, memory bandwidth,
 clocks and dtype-specific peaks must identify the SKU/model and operating
 configuration. Historical bandwidth/peak numbers from different boxes are
-not a single PPU spec. The [coverage map](../../../docs/ppu-adaptation.md#knowledge-coverage-and-gaps)
-records the missing generation-specific information.
+not a single PPU spec. PPU1.0 still needs a complete card-specific resource
+profile, allocation rules, instruction timing and floating-point semantics.
+The [coverage map](../../../docs/ppu-adaptation.md#knowledge-coverage-and-gaps)
+records these gaps for all three generations.
 
 Normalize emitted instruction work per useful tile/output, and separate static
 code size from dynamic execution counts. Compiler acceptance, efficient native
