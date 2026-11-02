@@ -51,13 +51,14 @@ def parse_device(output: str, selected: int) -> dict:
     return device
 
 
-def inspect(sdk: Path, device: int, out: Path, timeout: float) -> dict:
+def inspect(sdk: Path, device: int, out: Path, timeout: float, cxx: str = "c++") -> dict:
     report = {
-        "requested_target": "ZW810 / PPU0010",
+        "requested_target": "PPU",
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
         "sdk": str(sdk), "selected_device": device,
         "status": "unavailable", "device": None, "tools": {},
         "kernel_execution": "not_performed",
+        "query_mode": "host_runtime_only",
     }
     locations = {
         "hgcc": [sdk / "bin/hgcc"],
@@ -66,21 +67,25 @@ def inspect(sdk: Path, device: int, out: Path, timeout: float) -> dict:
         "asys": [sdk / "asight/bin/asys"],
     }
     for name, candidates in locations.items():
-        # Use the selected SDK compiler. Profilers may be separately installed.
+        # Inspect the selected SDK tools. Profilers may be separately installed.
         if name in {"acu", "asys"} and shutil.which(name):
             candidates.append(Path(shutil.which(name)))
         executable = next((p for p in candidates if p.is_file() and os.access(p, os.X_OK)),
                           candidates[0])
         report["tools"][name] = run([str(executable), "--version"], out, name, timeout)
 
-    if report["tools"]["hgcc"]["status"] != "ok":
-        report["reason"] = "Selected SDK compiler is unavailable; inspect hgcc.log"
+    report["tools"]["cxx"] = run([cxx, "--version"], out, "cxx", timeout)
+    if report["tools"]["cxx"]["status"] != "ok":
+        report["reason"] = "Host C++ compiler is unavailable; inspect cxx.log or pass --cxx"
         return report
 
     binary = out / "ppu_device_info"
-    command = [str(sdk / "bin/hgcc"), "-x", "hg", "-arch=ppu_10",
-               "-DSWITCH_TO_HGGCRT", "-std=c++17", "-L", str(sdk / "lib"),
-               str(DEVICE_SOURCE), "-o", str(binary)]
+    # Compile only the host runtime query. Selecting a device ISA belongs to
+    # the task's kernel build, after the actual device has been identified.
+    command = [cxx, "-DSWITCH_TO_HGGCRT", "-std=c++17", "-I", str(sdk / "include"),
+               "-L", str(sdk / "lib"),
+               str(DEVICE_SOURCE), "-Wl,--start-group", "-lhggc", "-lhggcrt1",
+               "-Wl,--end-group", "-o", str(binary)]
     report["build"] = run(command, out, "device-query-build", timeout)
     if report["build"]["status"] != "ok" or not binary.is_file():
         report["reason"] = "Runtime query build failed; inspect device-query-build.log"
@@ -97,8 +102,9 @@ def inspect(sdk: Path, device: int, out: Path, timeout: float) -> dict:
         return report
     report["status"] = "runtime_queried"
     report["reason"] = (
-        "Confirm the reported model is the intended ZW810. Runtime properties do not "
-        "validate a kernel, compiler device lowering or profiler capture."
+        "Confirm the reported PPU model and select the matching kernel target in "
+        "the task's build. Runtime properties do not validate a kernel, compiler "
+        "device lowering or profiler capture."
     )
     return report
 
@@ -108,6 +114,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--sdk", default=os.environ.get("PPU_SDK"),
                         help="Installed SDK root (default: PPU_SDK)")
     parser.add_argument("--device", type=int, default=0, help="Runtime-visible device ordinal")
+    parser.add_argument("--cxx", default="c++",
+                        help="Host C++ compiler executable for the query (default: c++)")
     parser.add_argument("--out", type=Path, required=True, help="New output directory in the task workspace")
     parser.add_argument("--timeout", type=float, default=60, help="Seconds allowed for each command")
     args = parser.parse_args(argv)
@@ -121,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
     except FileExistsError:
         parser.error("--out already exists; choose a new directory to preserve prior evidence")
     sdk = Path(args.sdk).expanduser().resolve()
-    report = inspect(sdk, args.device, out, args.timeout)
+    report = inspect(sdk, args.device, out, args.timeout, args.cxx)
     path = out / "environment.json"
     path.write_text(json.dumps(report, indent=2) + "\n")
     print(f"{report['status']}: {path}")

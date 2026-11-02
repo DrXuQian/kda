@@ -3,7 +3,7 @@
 ACU and Asys are PPU-owned profiling tools. Select the tool by the evidence
 needed for the current candidate, using the installed toolchain's capabilities.
 
-For a physical ZW810, start with [the execution guide](zw810.md). Its environment
+For a physical PPU, start with [the execution guide](ppu.md). Its environment
 helper queries the selected runtime device and records installed tool versions;
 the task's actual build and numerical run establish kernel readiness.
 

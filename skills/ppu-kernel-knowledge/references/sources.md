@@ -54,4 +54,4 @@ T-Head projects provide official PPU starting points. Validate the selected
 revision on the requested device. PPU migration knowledge is included locally.
 The SDK/runtime and target kernel source remain task dependencies; KDA does
 not bundle vendor binaries, private backend archives or original profiler
-reports. See [the ZW810 entry](../../../docs/zw810.md) for execution.
+reports. See [the PPU entry](../../../docs/ppu.md) for execution on the selected generation.

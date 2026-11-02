@@ -1,7 +1,7 @@
-# ZW810 Kernel Task
+# PPU Kernel Task
 
-Work in the kernel implementation workspace on the allocated ZW810. Follow
-Kernel Design Agents from `<KDA checkout>`, starting with `docs/zw810.md` and
+Work in the kernel implementation workspace on the allocated PPU. Follow
+Kernel Design Agents from `<KDA checkout>`, starting with `docs/ppu.md` and
 the relevant `ppu-kernel-knowledge` / `ppu-profiling` references.
 
 ## Task
@@ -12,15 +12,20 @@ the relevant `ppu-kernel-knowledge` / `ppu-profiling` references.
 - Required behavior: `<reference implementation/tests; retain existing semantics>`
 - Target metric: `<kernel or complete-call latency/throughput; retain existing scope if specified>`
 - Device: `<allocated runtime-visible ordinal; default 0>`
+- Target: `<PPU model/generation if known; otherwise identify it on the machine>`
 
 ## Workflow
 
 1. Inspect the source, tests and build configuration. Identify the selected
    kernel, public semantics, independent oracle and existing PPU/NVIDIA paths.
    Resolve the concrete build, validation and benchmark commands yourself.
-2. Confirm the actual ZW810, SDK/runtime and dependency revision. Reuse existing
-   valid environment evidence or run KDA's `scripts/inspect_zw810.py` into the
+2. Confirm the actual PPU model/generation, SDK/runtime and dependency revision.
+   Reuse valid environment evidence or run KDA's `scripts/inspect_ppu.py` into the
    task's `runs/` directory. Treat its properties as reported values, not peaks.
+   Resolve the native kernel target from the installed SDK and task build;
+   the host-only query does not choose an ISA or prove kernel support. Do not
+   infer PPU generation from NVIDIA-compatible compute capability or transfer
+   PPU1.0 instruction/layout settings to PPU1.5 or another generation.
 3. Write `docs/draft.md` and an executable `docs/plan.md`. Include the actual
    commands, representative cases and correctness/performance acceptance.
 4. For optimization, validate and measure the unchanged PPU baseline first.
@@ -34,7 +39,7 @@ the relevant `ppu-kernel-knowledge` / `ppu-profiling` references.
    Keep existing NVIDIA code available for reference. Do not change dtype,
    numerical semantics or public scope just to obtain a faster result.
 6. Validate each meaningful candidate, then measure matched inputs and cache
-   policy on ZW810. Use ACU for kernel bottlenecks and Asys for call-level costs
+   policy on the selected PPU. Use ACU for kernel bottlenecks and Asys for call-level costs
    when the current question needs them. Record report paths and native identity.
 7. Keep/revise/reject each candidate against the task contract and continue
    the KDA loop. Retain the best valid implementation and explain any measured
@@ -43,7 +48,8 @@ the relevant `ppu-kernel-knowledge` / `ppu-profiling` references.
 Create missing task-specific harnesses in this workspace when needed. Ask for
 clarification only when the input semantics or acceptance cannot be established
 from the task and code. Do not wait for a complete hardware manual, historical
-memory files or unrelated PPU1.7/DSL material before progressing on ZW810.
+memory files or material unrelated to the selected generation/backend when
+the task's required primitives can already be built and validated.
 
 ## Deliver
 

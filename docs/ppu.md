@@ -1,15 +1,16 @@
-# Run KDA on ZW810
+# Run KDA on PPU
 
-Use this entry to optimize a kernel on ZW810 or port an NVIDIA kernel to it.
-The target is PPU1.0 / PPU0010. KDA supplies the agent workflow, knowledge and
-profiling guidance; the agent works in the kernel's own implementation repo.
+Use this entry to optimize a kernel on a PPU or port an NVIDIA kernel to it.
+Identify the actual model and generation before selecting a native build or
+applying hardware-specific knowledge. KDA supplies the agent workflow,
+knowledge and profiling guidance; the agent works in the kernel's own repo.
 The starting inputs are the kernel/source path and representative workloads.
 The agent resolves build, correctness and benchmark commands from that repo.
 
 ## Start on the device machine
 
 Clone the PPU branch and enter the kernel workspace. Use the SDK/runtime already
-installed for that ZW810; its compiler, libraries and driver must work together.
+installed for that device; its compiler, libraries and driver must work together.
 
 ```bash
 git clone --branch ppu-knowledge-rebuild https://github.com/DrXuQian/kda.git
@@ -18,19 +19,20 @@ export PPU_SDK=/path/to/the/installed/PPU_SDK
 source "$PPU_SDK/envsetup.sh"
 cd /path/to/kernel-workspace
 
-python3 "$KDA_ROOT/scripts/inspect_zw810.py" \
+python3 "$KDA_ROOT/scripts/inspect_ppu.py" \
   --device 0 --out "runs/environment-$(date -u +%Y%m%dT%H%M%SZ)"
 ```
 
 Choose the allocated runtime-visible device ordinal. The helper compiles a
 small runtime query and records the reported card, CU count, memory/cache,
 register/shared limits and tool versions in `environment.json` with raw logs.
-It launches no kernels and installs nothing. It uses only Python's standard
-library and the selected native SDK; PyTorch and actlize are not prerequisites
-for this query. There is no dependency on the author's memory or global skills.
+It launches no kernels and installs nothing. It uses Python's standard library,
+a host C++ compiler and the selected native SDK; PyTorch and actlize are not
+prerequisites for this query. There is no dependency on the author's memory
+or global skills.
 
 `runtime_queried` means the query succeeded. Confirm the reported card is the
-intended ZW810; compatibility compute capability alone does not identify it.
+intended PPU; compatibility compute capability alone does not identify its generation.
 Zero resource fields may be unreported and do not establish a zero capacity.
 The helper's `l2_cache_bytes` preserves the SDK's `l2CacheSize` value; verify
 which level and sharing domain it describes before choosing a cold-weight ring.
@@ -38,21 +40,50 @@ Official HGGC documentation distinguishes per-CU L1, CE-shared L2 and LLC;
 the runtime API labels this property in bytes but leaves aggregation unspecified.
 The [uploaded diagram](../skills/ppu-kernel-knowledge/references/memory-hierarchy.md#unidentified-diagram-annotations)
 still has no confirmed SKU. Its 512 KB L2,
-64 MB LLC and 288 GB HBM3 annotations are not defaults for this ZW810 query.
+64 MB LLC and 288 GB HBM3 annotations are not defaults for an arbitrary PPU.
 Compiler target/lowering, kernel correctness and profiler capture still need
 the task's actual build/run. Missing profiler tools do not prevent a correct
 baseline; resolve the relevant tool when the experiment requires it.
 
-The helper's `-x hg -arch=ppu_10` recipe targets the reviewed native SDK2.1.1
-interface. If another SDK rejects it, inspect its help and the project's working
-build command. An importer/runtime library failure needs the matching PPU
-container/environment; do not substitute the machine's NVIDIA CUDA toolkit.
+The helper builds `ppu_device_info.cpp` with a host C++ compiler (`c++`, or
+`--cxx /path/to/compiler`) and the selected SDK's native headers and
+`hggc` / `hggcrt1` runtime libraries. Use a host compiler compatible with that
+SDK. This avoids HGCC's implicit device-link target; no kernel ISA is selected.
+The query does not compile or execute a kernel. Tool availability, including
+HGCC, is recorded separately and is not a kernel-readiness certification.
+Select the real kernel target after identifying the device. If another SDK
+changes these interfaces, reuse the project's working runtime-query command.
+A runtime library failure needs the matching PPU container/environment;
+do not substitute the machine's NVIDIA CUDA toolkit.
 
 Start the coding agent in the implementation workspace and give it
-[the ZW810 task prompt](../prompts/zw810.md), filled with `KDA_ROOT`, the kernel
+[the PPU task prompt](../prompts/ppu.md), filled with `KDA_ROOT`, the kernel
 path and workload. Existing [skill discovery](../README.md#getting-started) is
 optional when the agent can read those paths directly. No ACU/Asys MCP is needed
 when the agent has shell access to the installed tools.
+
+## Select the actual target
+
+The [architecture reference](../skills/ppu-kernel-knowledge/references/architecture.md)
+and [official manuals](../skills/ppu-kernel-knowledge/references/official-docs.md)
+distinguish these targets. HGCC names below come from the reviewed compiler
+guide; verify support in the SDK installed on the task machine.
+
+| Confirmed device/generation | Public ISA / native HGCC target | Kernel implications |
+|---|---|---|
+| ZW810 family, PPU1.0 | `ppu001` / `-arch=ppu_10` | tc01 MMA and the PPU1.0 AIU/fragment contract. |
+| M890, PPU1.5 | `ppu0015` / `-arch=ppu_15` | tc02 and a different AIU/fragment contract; select the corresponding backend. |
+| Other or unidentified PPU | Resolve from the device, SDK and working task build | Do not default to PPU1.0 or infer a native target from a historical source tag. |
+
+If the machine is called ZW890 locally, confirm whether its runtime/product
+identity is the documented M890 before selecting that row. The helper reports
+the device name as returned by the runtime; it does not guess aliases or
+certify a backend. PPU1.7 source/model material likewise does not establish
+native compiler/runtime support.
+
+When changing devices, rebuild and validate the actual kernel, then establish
+the performance baseline on that device. Recheck resources, tiling, cache
+policy and profiler counters rather than carrying over another SKU's tuning.
 
 ## What the agent executes
 
@@ -94,11 +125,11 @@ references for attention are listed in the [source index](../skills/ppu-kernel-k
 
 Distinguish these interfaces:
 
-| Interface | ZW810 starting point | Check |
+| Interface | Target selection | Check |
 |---|---|---|
-| Native HGGC | SDK `bin/hgcc`, `-x hg -arch=ppu_10`, native runtime | The actual kernel body and host binding must compile/link and run. |
-| Official actlize configuration | `cutlass::arch::PPU0010`; reviewed CMake uses `CUTLASS_PPU_ARCHS=ppu0010` | Follow the instantiated builder/collective, not just a schedule's name. |
-| Earlier PPU CuTe tree | `Acompute10000_*` atoms / target configuration `10000` | Match the selected tree's naming, traits and runtime. |
+| Native HGGC | SDK `bin/hgcc`, `-x hg` and the target for the identified generation | The actual kernel body and host binding must compile/link and run; the query's host build is separate. |
+| Official actlize configuration | Use the selected release's generation-specific architecture tag and CMake options. The reviewed PPU1.0 path uses `cutlass::arch::PPU0010` / `CUTLASS_PPU_ARCHS=ppu0010`. | Follow the instantiated builder/collective. Do not assume this PPU1.0 path implements a PPU1.5 kernel. |
+| Earlier PPU CuTe tree | `Acompute10000_*` / target `10000` describes PPU1.0; other generations require their corresponding traits | Match the selected tree's naming, traits and runtime. |
 | CUDA-compatible project | That project's SDK CUDA wrapper and existing build flags | Verify native PPU output. The historical CMake no-arch workaround is specific to its wrapper, not a universal build rule. |
 
 Inspect a built object/library when lowering or resource use matters:
@@ -117,9 +148,11 @@ Native target checks use the real build; the environment query is host-only.
 For NVIDIA-to-PPU changes, begin with [architecture](../skills/ppu-kernel-knowledge/references/architecture.md)
 and [CUTLASS/actlize](../skills/ppu-kernel-knowledge/references/cutlass-porting.md).
 Use [TIX contracts](../skills/ppu-kernel-knowledge/references/tix-porting.md)
-for instruction and cache-policy changes. Preserve plain cp.async when valid;
-compare documented software-expanded n8 forms with native n16 tiling, checking
-ldmatrix register order, accumulator reductions and any C-to-A bridge. Use
+for the selected generation's instruction and cache-policy changes. Preserve
+plain cp.async when valid. For PPU1.0 tc01 ports, compare documented
+software-expanded n8 forms with native n16 tiling; do not transfer that path
+to PPU1.5 tc02. Check ldmatrix register order, accumulator reductions and any
+C-to-A bridge against the actual backend. Use
 [numerical debugging](../skills/ppu-kernel-knowledge/references/numerics.md)
 when the first mismatch appears, before accepting timing.
 
@@ -141,15 +174,18 @@ and [metric/rule queries](../skills/ppu-profiling/references/metrics.md) for an
 identified kernel. Use [Asys](../skills/ppu-profiling/references/timeline.md)
 when copies, preparation, launch gaps or several kernels determine the result.
 The task supplies the executable and arguments; copy the actual commands and
-report locations into its plan. Physical ZW810 benchmarks may warm up and repeat
-according to that task; PPU1.7 single-invocation simulator rules do not apply.
+report locations into its plan. Physical-device benchmarks may warm up and
+repeat according to the task. A single-invocation simulator contract is a
+separate execution mode, not a rule for all devices of that generation.
 
 Complete with a reproducible PPU build/run command, correctness results,
 baseline/candidate timings and the retained implementation's supported scope.
-Missing general ISA tables, PPU1.7 features or DSL support do not block a ZW810
-task whose required primitives work. Obtain additional information only when
+Missing unrelated ISA tables, another generation's features or DSL support
+do not block a task whose required primitives work. Obtain information when
 the current build, mismatch or profile makes it necessary.
 
-The entry is prepared for execution on ZW810. Local development validation used
-SDK2.1.1 on a host without a PPU; an actual ZW810 end-to-end result must come
-from the task's run on that device.
+The entry is shared across PPU targets; it is not a device certification.
+Local validation compiled the host query with SDK2.1.1 headers to an object
+without a device ISA. This host has no PPU and lacks the native runtime/driver libraries
+needed to link and execute the query. Kernel support and an end-to-end result
+must come from the task's build and run on the selected device.

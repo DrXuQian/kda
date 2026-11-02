@@ -16,10 +16,10 @@ MCP is an optional way to expose the same tools.
 | Path | Purpose |
 |---|---|
 | `basic-flow.md` | Minimal prompt for research, planning, implementation, validation, and iteration. |
-| `zw810.md` | Optimize a PPU kernel or migrate an NVIDIA kernel on ZW810; the agent resolves task commands from source. |
+| `ppu.md` | Optimize a PPU kernel or migrate an NVIDIA kernel; the agent identifies the target and resolves task commands from source. |
 
-For direct work on ZW810, use the [device entry](../docs/zw810.md) and
-`zw810.md`. Supplying the kernel path and workload is enough to start inspecting
+For direct work on PPU, use the [device entry](../docs/ppu.md) and
+`ppu.md`. Supplying the kernel path and workload is enough to start inspecting
 the task; the agent fills the executable contract before implementing changes.
 
 ## How To Use

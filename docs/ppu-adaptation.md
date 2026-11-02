@@ -24,7 +24,7 @@ the rebuild branch above that baseline.
 | Humanize planning | Keep optional | Converting a draft into an executable plan is independent of the accelerator. |
 | `docs/huggingface-export.md` | Retain upstream instructions; add separate `docs/ppu-artifacts.md` | The upstream helper accepts Python/JSON CuTe-DSL sources; PPU native libraries need their existing SDK builder and ABI contract. |
 | `scripts/export_huggingface.py` and its tests | Retain unchanged from synchronized main | They continue to serve the upstream CUDA/CuTe-DSL workflow; their presence does not establish native PPU packaging support. |
-| Physical ZW810 entry | Add `docs/zw810.md`, `prompts/zw810.md` and a small environment query | Run the existing KDA loop with task-owned build/oracle/benchmark commands. Query actual resources without requiring a complete hardware survey. |
+| Physical PPU entry | Add `docs/ppu.md`, `prompts/ppu.md` and `scripts/inspect_ppu.py` | Query the device through its host runtime, select the actual generation's kernel target, then run task-owned build/oracle/benchmark commands. |
 | `CONTRIBUTING.md` | Add PPU evidence and request guidance; retain DCO and licensing text | Contribution mechanics remain valid; target-specific evidence must be explicit. |
 | `.github/PULL_REQUEST_TEMPLATE/wishlist.md` | Adapt target/environment fields | PPU requests need generation and SDK identity, not B200/B300 checkboxes. |
 | `.github/ISSUE_TEMPLATE/config.yml` | Distinguish PPU contract from upstream wishlist | Do not send PPU requests to a NVIDIA-only acceptance path. |
@@ -83,8 +83,10 @@ formats, alongside algorithms and optimization techniques. The NCU companion
 adds a B200/H100 resource table, memory/compute peaks and diagnosis dimensions.
 These define the questions to answer for PPU, not values to copy into a PPU card.
 
-PPU1.0 is a primary target. Its native MMA, AIU/SWZL, actlize, CuTe debugging
-and operator evidence are now joined by official HGGC/TIX and Asight manuals.
+PPU1.0 remains a supported knowledge target alongside PPU1.5. Its native MMA,
+AIU/SWZL, actlize, CuTe debugging and operator evidence are now joined by
+official HGGC/TIX and Asight manuals. The shared entry does not make one
+generation's source paths or tuning valid on another.
 The [official document map](../skills/ppu-kernel-knowledge/references/official-docs.md)
 records reviewed versions, public implementation starting points and specific
 documentation conflicts. Keep architectural rules separate from SKU quantities

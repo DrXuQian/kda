@@ -5,8 +5,8 @@ workflow small. PPU knowledge and tool guidance belong here; task kernels,
 datasets, private paths, reports and binaries belong in task workspaces.
 Repository-facing prose, code and comments use English.
 
-For a ZW810 task, start with `docs/zw810.md` and `prompts/zw810.md`. Inspect the
-task repo and resolve its native build, independent oracle and benchmark. Run
+For a PPU task, start with `docs/ppu.md` and `prompts/ppu.md`. Identify the
+actual device/generation, then resolve the task's native build, oracle and benchmark. Run
 the KDA loop on the requested device; general hardware-documentation gaps are
 not prerequisites when the task's required primitives can be built and tested.
 

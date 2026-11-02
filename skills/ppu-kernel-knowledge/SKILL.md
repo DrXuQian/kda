@@ -10,8 +10,8 @@ the target generation and current implementation first. Read the architecture
 page and the operator page relevant to the question; do not load the entire
 collection for every task.
 
-For optimization or NVIDIA-to-PPU migration on a physical ZW810, use the
-[ZW810 execution entry](../../docs/zw810.md) with this knowledge.
+For optimization or NVIDIA-to-PPU migration on a physical PPU, use the
+[PPU execution entry](../../docs/ppu.md) and select the actual generation's knowledge.
 
 ## Select a reference
 
